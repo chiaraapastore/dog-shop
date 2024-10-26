@@ -1,6 +1,6 @@
 package com.example.dogshop.controller;
 
-import com.example.dogshop.entity.Product ;
+import com.example.dogshop.entity.Product;
 import com.example.dogshop.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,15 +15,21 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+
     @PostMapping
-    public ResponseEntity<Product > createProduct(@RequestBody Product  product) {
-        Product  newProduct = productService.createProduct(product);
+    public ResponseEntity<Product> createProduct(
+            @RequestBody Product product,
+            @RequestParam String categoryName) {
+        Product newProduct = productService.createProduct(product, categoryName);
         return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product > updateProduct(@PathVariable Long id, @RequestBody Product  product) {
-        Product  updatedProduct = productService.updateProduct(id, product);
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable Long id,
+            @RequestBody Product product,
+            @RequestParam String categoryName) {
+        Product updatedProduct = productService.updateProduct(id, product, categoryName);
         return ResponseEntity.ok(updatedProduct);
     }
 
@@ -34,20 +40,21 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+
     @GetMapping("/{id}")
-    public ResponseEntity<Product > findProductById(@PathVariable Long id) {
-        Product  product = productService.findProductById(id);
+    public ResponseEntity<Product> findProductById(@PathVariable Long id) {
+        Product product = productService.findProductById(id);
         return ResponseEntity.ok(product);
     }
 
+
     @GetMapping
-    public ResponseEntity<Page<Product >> findAllProducts(
+    public ResponseEntity<Page<Product>> findAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<Product > products = productService.findAllProducts(page, size);
+        Page<Product> products = productService.findAllProducts(page, size);
         return ResponseEntity.ok(products);
     }
-
 
     @PutMapping("/{id}/update-quantity")
     public ResponseEntity<Void> updateAvailableQuantity(
