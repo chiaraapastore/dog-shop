@@ -2,7 +2,7 @@ package com.example.dogshop.service;
 
 import com.example.dogshop.entity.Category;
 import com.example.dogshop.entity.Product;
-import com.example.dogshop.repository.CategoryRepository;
+import com.example.dogshop.service.CategoryService;
 import com.example.dogshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,38 +14,29 @@ import jakarta.transaction.Transactional;
 @Service
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final CategoryService categoryService;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-
-
-    public Product createProduct(Product product, String categoryName) {
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        product.setCategory(category);
-        return productRepository.save(product);
+    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+        this.productRepository = productRepository;
+        this.categoryService = categoryService;
     }
 
-
     @Transactional
-    public Product updateProduct(Long id, Product product, String categoryName) {
+    public Product updateProduct(Long id, Product productDetails) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        existingProduct.setProductName(product.getProductName());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setAvailableQuantity(product.getAvailableQuantity());
+        existingProduct.setProductName(productDetails.getProductName());
+        existingProduct.setPrice(productDetails.getPrice());
+        existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
 
-        Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        Category category = categoryService.findCategoryById(productDetails.getCategory().getId());
         existingProduct.setCategory(category);
 
         return productRepository.save(existingProduct);
     }
-
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);

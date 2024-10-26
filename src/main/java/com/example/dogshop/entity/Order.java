@@ -24,7 +24,7 @@ public class Order {
     private Utente utente;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orderProducts = new ArrayList<>();
+    private List<Product> orderProducts = new ArrayList<>();
 
     @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL)
     private Payment payment;

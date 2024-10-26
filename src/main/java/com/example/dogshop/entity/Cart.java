@@ -23,6 +23,6 @@ public class Cart {
     private Utente utente;
 
     @OneToMany(mappedBy = "cartProduct", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cart> cartProducts = new ArrayList<>();
+    private List<Product> cartProducts = new ArrayList<>();
 
 }

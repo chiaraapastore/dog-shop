@@ -53,6 +53,13 @@ public class KeycloakService {
         if (response != null && response.getStatusCode().is2xxSuccessful()) {
             String userId = extractUserId(response);
             assignRoleToUser(authorizationHeader, userId, utente.getRole());
+
+            Utente savedUser = new Utente();
+            savedUser.setUsername(utente.getUsername());
+            savedUser.setEmail(utente.getEmail());
+            savedUser.setRole(utente.getRole());
+            utenteRepository.save(savedUser);
+
             return response;
         } else {
             throw new RuntimeException("Errore nella creazione dell'utente: " + response.getBody());
@@ -85,16 +92,22 @@ public class KeycloakService {
         String accessToken = getAdminAccessToken();
         String authorizationHeader = "Bearer " + accessToken;
 
+        Optional<Utente> userOpt = utenteRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            return userOpt.get();
+        }
+
         List<UserRepresentation> users = keycloakClient.getUsersByUsername(authorizationHeader, realm, username);
         if (users.isEmpty()) {
             throw new RuntimeException("User not found in Keycloak with username: " + username);
         }
+
         UserRepresentation userRep = users.get(0);
         Utente utente = new Utente();
         utente.setUsername(userRep.getUsername());
         utente.setEmail(userRep.getEmail());
+
+        utenteRepository.save(utente);
         return utente;
     }
-
 }
-

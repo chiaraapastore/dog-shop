@@ -2,9 +2,9 @@ package com.example.dogshop.controller;
 
 import com.example.dogshop.entity.Product;
 import com.example.dogshop.service.ProductService;
+import com.example.dogshop.service.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,34 +12,29 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/products")
 public class ProductController {
 
+    private final ProductService productService;
+    private final UtenteService userService;
+
     @Autowired
-    private ProductService productService;
-
-
-    @PostMapping
-    public ResponseEntity<Product> createProduct(
-            @RequestBody Product product,
-            @RequestParam String categoryName) {
-        Product newProduct = productService.createProduct(product, categoryName);
-        return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+    public ProductController(ProductService productService, UtenteService userService) {
+        this.productService = productService;
+        this.userService = userService;
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(
-            @PathVariable Long id,
-            @RequestBody Product product,
-            @RequestParam String categoryName) {
-        Product updatedProduct = productService.updateProduct(id, product, categoryName);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        String username = userService.getAuthenticatedUsername();
+        System.out.println("Updating product for user: " + username);
+
+        Product updatedProduct = productService.updateProduct(id, productDetails);
         return ResponseEntity.ok(updatedProduct);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> findProductById(@PathVariable Long id) {

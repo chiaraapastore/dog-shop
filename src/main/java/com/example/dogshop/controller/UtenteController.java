@@ -2,27 +2,54 @@ package com.example.dogshop.controller;
 import com.example.dogshop.entity.Utente;
 import com.example.dogshop.entity.UtenteKeycloak;
 import com.example.dogshop.service.KeycloakService;
-import org.keycloak.representations.account.UserRepresentation;
+import com.example.dogshop.service.UtenteService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/utente")
+
 public class UtenteController {
 
+    @Autowired
     private final KeycloakService keycloakService;
+    private final UtenteService utenteService;
 
-    public UtenteController(KeycloakService keycloakService) {
+
+    public UtenteController(KeycloakService keycloakService, UtenteService utenteService) {
         this.keycloakService = keycloakService;
+        this.utenteService = utenteService;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
-        String token = keycloakService.login(username, password);
-        return ResponseEntity.ok(token);
+    @PostMapping("/register")
+    public ResponseEntity<Utente> registerUser(@RequestBody Utente user) {
+        if (utenteService.findByUsername(user.getUsername()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        Utente savedUser = utenteService.saveUser(user);
+        return ResponseEntity.ok(savedUser);
     }
 
-    @PostMapping("/create")
+    @GetMapping("/login")
+    public ResponseEntity<Utente> login(Principal principal) {
+        String username = principal.getName();
+        Utente user = utenteService.findByUsername(username)
+                .orElseGet(() -> {
+                    Utente newUser = new Utente();
+                    newUser.setUsername(username);
+                    return utenteService.saveUser(newUser);
+                });
+
+        return ResponseEntity.ok(user);
+    }
+
+
+@PostMapping("/create")
     public ResponseEntity<Object> createUser(@RequestBody UtenteKeycloak utente) {
         return keycloakService.createUserInKeycloak(utente);
     }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
-    Cart findByUserId(Long userId);
     @Query("SELECT c FROM Cart c JOIN c.cartProducts cp WHERE c.utente.id = :userId")
     Cart findCartWithProductsByUserId(@Param("userId") Long userId);
 }

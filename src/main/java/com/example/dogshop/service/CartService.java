@@ -12,7 +12,7 @@ public class CartService {
     private CartRepository cartRepository;
 
     public Cart getCartByUserId(Long userId) {
-        return cartRepository.findByUserId(userId);
+        return cartRepository.findCartWithProductsByUserId(userId);
     }
 
 

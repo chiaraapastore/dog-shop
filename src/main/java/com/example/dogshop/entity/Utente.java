@@ -22,6 +22,7 @@ public class Utente {
     private String address;
     private String numberCell;
     private String role;
+    private String username;
 
     @OneToOne(mappedBy = "customerCart", cascade = CascadeType.ALL)
     private Cart carts;
@@ -29,7 +30,4 @@ public class Utente {
     @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL)
     private List<Order> orders;
 
-    public void setUsername(String username) {
-        this.firstName = username;
-    }
 }
