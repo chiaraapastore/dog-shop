@@ -1,5 +1,5 @@
 package com.example.dogshop.controller;
-import com.example.dogshop.entity.Order;
+import com.example.dogshop.entity.CustomerOrder;
 import com.example.dogshop.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +16,13 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping("/user/{userId}")
-    public List<Order> getOrdersByUserId(@PathVariable Long userId) {
+    public List<CustomerOrder> getOrdersByUserId(@PathVariable Long userId) {
         return orderService.findOrdersByUserId(userId);
     }
 
     @PostMapping
-    public ResponseEntity<Order> placeOrder(@RequestBody Order order) {
-        Order savedOrder = orderService.saveOrder(order);
+    public ResponseEntity<CustomerOrder> placeOrder(@RequestBody CustomerOrder order) {
+        CustomerOrder savedOrder = orderService.saveOrder(order);
         return ResponseEntity.ok(savedOrder);
     }
 }

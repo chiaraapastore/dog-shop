@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @Entity
 @AllArgsConstructor
@@ -23,14 +20,16 @@ public class Product {
     private double price;
     private int availableQuantity;
 
-    @OneToMany(mappedBy = "product")
-    private List<Cart> carts = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "cart_id")
+    private Cart cartProduct;
 
-    @OneToMany(mappedBy = "product")
-    private List<Order> orders = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private CustomerOrder order;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
 }
+

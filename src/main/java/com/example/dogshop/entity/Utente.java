@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Utente {
 
     @Id
@@ -24,10 +25,9 @@ public class Utente {
     private String role;
     private String username;
 
-    @OneToOne(mappedBy = "customerCart", cascade = CascadeType.ALL)
-    private Cart carts;
+    @OneToOne(mappedBy = "utente", cascade = CascadeType.ALL)
+    private Cart cart;
 
-    @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL)
-    private List<Order> orders;
-
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL)
+    private List<CustomerOrder> orders;
 }

@@ -20,9 +20,8 @@ public class Cart {
 
     @OneToOne
     @JoinColumn(name = "utente_id")
-    private Utente utente;
+    private Utente utente; // Cambia il nome per riflettere il "mappedBy" in Utente
 
     @OneToMany(mappedBy = "cartProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> cartProducts = new ArrayList<>();
-
 }

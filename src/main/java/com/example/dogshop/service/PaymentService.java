@@ -12,7 +12,7 @@ public class PaymentService {
     private PaymentRepository paymentRepository;
 
     public Payment getPaymentByOrderId(Long orderId) {
-        return paymentRepository.findByOrderId(orderId);
+        return paymentRepository.findByCustomerOrder_Id(orderId);
     }
 
     public Payment savePayment(Payment payment) {

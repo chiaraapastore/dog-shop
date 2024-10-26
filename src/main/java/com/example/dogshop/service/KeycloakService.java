@@ -4,6 +4,7 @@ import com.example.dogshop.client.KeycloakClient;
 import com.example.dogshop.entity.Utente;
 import com.example.dogshop.entity.UtenteKeycloak;
 import com.example.dogshop.repository.UtenteRepository;
+import com.example.dogshop.utility.JwtUtils;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -11,8 +12,8 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +22,7 @@ public class KeycloakService {
 
     private final KeycloakClient keycloakClient;
     private final UtenteRepository utenteRepository;
+    private final JwtUtils jwtUtils;
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -40,10 +42,16 @@ public class KeycloakService {
     @Value("${keycloak.admin.client-secret}")
     private String clientSecretAdmin;
 
+
     public String login(String username, String password) {
-        return keycloakClient.login(username, password, clientIdAdmin, clientSecretAdmin)
-                .getBody().get("access_token").toString();
+        Map<String, Object> response = keycloakClient.login(username, password, clientIdAdmin, clientSecretAdmin).getBody();
+        if (response != null && response.containsKey("access_token")) {
+            return response.get("access_token").toString();
+        } else {
+            throw new RuntimeException("Login failed: no access token received.");
+        }
     }
+
 
     public ResponseEntity<Object> createUserInKeycloak(UtenteKeycloak utente) throws FeignException {
         String accessToken = getAdminAccessToken();
@@ -59,12 +67,13 @@ public class KeycloakService {
             savedUser.setEmail(utente.getEmail());
             savedUser.setRole(utente.getRole());
             utenteRepository.save(savedUser);
-
-            return response;
+            String token = jwtUtils.generateToken(savedUser);
+            return ResponseEntity.ok(token);
         } else {
-            throw new RuntimeException("Errore nella creazione dell'utente: " + response.getBody());
+            throw new RuntimeException("Errore nella creazione dell'utente: " + (response != null ? response.getBody() : "Nessuna risposta"));
         }
     }
+
 
     private String extractUserId(ResponseEntity<Object> response) {
         String location = response.getHeaders().get("location").get(0);
@@ -87,6 +96,7 @@ public class KeycloakService {
     public String getAdminAccessToken() {
         return login(adminUsername, adminPassword);
     }
+
 
     public Utente getByUsername(String username) {
         String accessToken = getAdminAccessToken();

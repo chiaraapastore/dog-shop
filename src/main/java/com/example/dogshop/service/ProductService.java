@@ -1,14 +1,12 @@
 package com.example.dogshop.service;
-
+import org.springframework.stereotype.Service;
 import com.example.dogshop.entity.Category;
 import com.example.dogshop.entity.Product;
-import com.example.dogshop.service.CategoryService;
 import com.example.dogshop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -42,18 +40,15 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-
     public Product findProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
-
     public Page<Product> findAllProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return productRepository.findAll(pageable);
     }
-
 
     @Transactional
     public void updateAvailableQuantity(Long id, int quantity) {

@@ -1,15 +1,13 @@
 package com.example.dogshop.entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 
 import java.util.Collections;
 
+@Data
 @Setter
 @Getter
 @AllArgsConstructor
