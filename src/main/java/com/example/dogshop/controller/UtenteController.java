@@ -1,4 +1,5 @@
 package com.example.dogshop.controller;
+import com.example.dogshop.config.AuthenticationService;
 import com.example.dogshop.entity.TokenRequest;
 import com.example.dogshop.entity.Utente;
 import com.example.dogshop.entity.UtenteKeycloak;
@@ -20,11 +21,13 @@ public class UtenteController {
     @Autowired
     private final KeycloakService keycloakService;
     private final UtenteService utenteService;
+    private final AuthenticationService authenticationService;
 
 
-    public UtenteController(KeycloakService keycloakService, UtenteService utenteService) {
+    public UtenteController(KeycloakService keycloakService, UtenteService utenteService, AuthenticationService authenticationService) {
         this.keycloakService = keycloakService;
         this.utenteService = utenteService;
+        this.authenticationService = authenticationService;
     }
 
 
@@ -71,6 +74,12 @@ public class UtenteController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/user-info")
+    public ResponseEntity<String> getUserInfo() {
+        String userId = authenticationService.getUserId();
+        return ResponseEntity.ok("User ID: " + userId);
     }
 
 
