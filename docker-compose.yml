@@ -1,0 +1,64 @@
+version: '3.8'  # Specifica la versione del file Docker Compose
+
+services:
+  # Servizio Keycloak
+  keycloak_dog-shop:
+    container_name: dog-shop-keycloak-container  # Nome del contenitore Keycloak
+    image: quay.io/keycloak/keycloak:22.0.3     # Immagine di Keycloak con versione specifica
+    command: start-dev                          # Comando per avviare Keycloak in modalità di sviluppo
+    environment:                                # Variabili d'ambiente per configurare Keycloak
+      KC_HOSTNAME: localhost                    # Nome host su cui sarà accessibile Keycloak
+      KC_HOSTNAME_PORT: 8080                    # Porta su cui sarà accessibile Keycloak
+      KC_HOSTNAME_STRICT_BACKCHANNEL: 'false'   # Disabilita il controllo rigoroso del backchannel
+      KC_HTTP_ENABLED: 'true'                   # Abilita il supporto HTTP (senza HTTPS)
+      KC_HOSTNAME_STRICT_HTTPS: 'false'         # Disabilita il controllo rigoroso HTTPS
+      KC_HEALTH_ENABLED: 'true'                 # Abilita il controllo dello stato di salute per Keycloak
+
+      # Credenziali dell'amministratore per accedere al pannello di Keycloak
+      KEYCLOAK_ADMIN: admin                     # Username dell'amministratore
+      KEYCLOAK_ADMIN_PASSWORD: admin            # Password dell'amministratore
+      KC_HOSTNAME_ADMIN_URL: "http://localhost:8080"  # URL di amministrazione
+
+      # Configurazione del database PostgreSQL per Keycloak
+      KC_DB: postgres                           # Tipo di database utilizzato (PostgreSQL)
+      KC_DB_URL_HOST: postgres_keycloak_dog-shop # Nome host del database PostgreSQL
+      KC_DB_URL_DATABASE: dog-shop               # Nome del database
+      KC_DB_URL_USERNAME: keycloak              # Username del database
+      KC_DB_PASSWORD: password                  # Password del database
+      KC_DB_SCHEMA: public                      # Schema del database
+
+    ports:
+      - "8080:8080"
+    restart: always  # Riavvia automaticamente il contenitore in caso di errore o interruzione
+    depends_on:
+      # Dipendenza dal servizio PostgreSQL, attende che PostgreSQL sia in stato "healthy" prima di avviare Keycloak
+      postgres_keycloak_dog-shop:
+        condition: service_healthy
+    networks:
+      - dog-shop_dev_network  # Usa una rete Docker dedicata per l'isolamento e la comunicazione
+
+  # Servizio PostgreSQL per Keycloak
+  postgres_keycloak_dog-shop:
+    image: postgres:16                       # Immagine di PostgreSQL versione 16
+    command: postgres -c 'max_connections=200' # Configurazione per aumentare le connessioni massime
+    volumes:
+      - /var/lib/postgresql/data  # Volume per persistere i dati del database
+    environment:                             # Variabili d'ambiente per configurare il database
+      POSTGRES_DB: dog-shop                   # Nome del database
+      POSTGRES_USER: keycloak                # Username per l'accesso al database
+      POSTGRES_PASSWORD: password            # Password per l'accesso al database
+    healthcheck:
+      test: "exit 0"                         # Test di salute (esecuzione semplice di exit 0)
+    ports:
+      - "5432:5432"  # Esponi la porta 5432 del contenitore su localhost:5432
+    networks:
+      - dog-shop_dev_network  # Usa la stessa rete Docker per consentire la comunicazione con Keycloak
+
+# Definizione dei volumi per la persistenza dei dati
+volumes:
+  pgdata_keycloak_dog-shop:  # Volume per la persistenza dei dati di PostgreSQL
+
+# Definizione della rete per il progetto
+networks:
+  dog-shop_dev_network:
+    driver: bridge  # Tipo di rete (bridge) per creare una rete isolata
