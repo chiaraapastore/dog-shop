@@ -15,18 +15,19 @@ public class AuthenticationService { // La classe gestisce la decodifica dei tok
         this.jwtDecoder = jwtDecoder;
     }
     // Metodo per ottenere l'username dal token JWT, per estrapolare username-email
+    // Correggi il recupero del token in `AuthenticationService`
     public String getUsername() {
         try {
-            //Il token viene recuperato dall'header della richiesta HTTP
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest(); // prendo la sessione corrente
-            String token = request.getHeader("Authorization").split("")[1]; //splittato
-            String result = JwtUtils.getNameFromToken(token);
-            return result;
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            String token = request.getHeader("Authorization").split(" ")[1];  // Corretta estrazione del token dopo "Bearer"
+            return JwtUtils.getNameFromToken(token);
         } catch (Exception e) {
             e.printStackTrace();
             return "guest";
         }
     }
+
+
 
     // Metodo per ottenere l'id utente dal token JWT attraverso i claim
     // I claim sono informazioni che vengono contenute nel JWT, come dati dell'utente, autorizzazioni, etc.
@@ -34,8 +35,7 @@ public class AuthenticationService { // La classe gestisce la decodifica dei tok
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             String token = request.getHeader("Authorization").split(" ")[1];
-            String id = JwtUtils.getIdFromToken(token);
-            return id;
+            return JwtUtils.getIdFromToken(token);
         } catch (Exception e) {
             e.printStackTrace();
             return "No_id";

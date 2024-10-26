@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -37,7 +38,29 @@ public class UtenteService {
         return utenteRepository.save(user);
     }
 
-    public Optional<Utente> findByEmail(String email) {
+    public Utente findByEmail(String email) {
         return utenteRepository.findByEmail(email);
+    }
+
+    public List<Utente> getAllUtenti() {
+        return utenteRepository.findAll();
+    }
+
+    public Utente updateUtente(Long id, Utente utenteDetails) {
+        Optional<Utente> optionalUtente = utenteRepository.findById(id);
+        if (optionalUtente.isPresent()) {
+            Utente utente = optionalUtente.get();
+            utente.setFirstName(utenteDetails.getFirstName());
+            return utenteRepository.save(utente);
+        }
+        return null;
+    }
+    public boolean deleteUtente(String email) {
+        Utente optionalUtente = utenteRepository.findByEmail(email);
+        if (optionalUtente != null) {
+            utenteRepository.deleteByEmail(email);
+            return true;
+        }
+        return false;
     }
 }

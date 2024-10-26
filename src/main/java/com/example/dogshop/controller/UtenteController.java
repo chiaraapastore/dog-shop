@@ -1,4 +1,5 @@
 package com.example.dogshop.controller;
+import com.example.dogshop.entity.TokenRequest;
 import com.example.dogshop.entity.Utente;
 import com.example.dogshop.entity.UtenteKeycloak;
 import com.example.dogshop.service.KeycloakService;
@@ -9,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/utente")
@@ -26,6 +27,12 @@ public class UtenteController {
         this.utenteService = utenteService;
     }
 
+
+    @GetMapping("/utenti")
+    public List<Utente> getAllUtenti() {
+        return utenteService.getAllUtenti();
+    }
+
     @PostMapping("/register")
     public ResponseEntity<Utente> registerUser(@RequestBody Utente user) {
         if (utenteService.findByUsername(user.getUsername()).isPresent()) {
@@ -35,23 +42,49 @@ public class UtenteController {
         return ResponseEntity.ok(savedUser);
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<Utente> login(Principal principal) {
-        String username = principal.getName();
-        Utente user = utenteService.findByUsername(username)
-                .orElseGet(() -> {
-                    Utente newUser = new Utente();
-                    newUser.setUsername(username);
-                    return utenteService.saveUser(newUser);
-                });
-
-        return ResponseEntity.ok(user);
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
+        try {
+            String token = keycloakService.login(tokenRequest.getUsername(), tokenRequest.getPassword());
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenziali non valide");
+        }
     }
 
 
-@PostMapping("/create")
-    public ResponseEntity<Object> createUser(@RequestBody UtenteKeycloak utente) {
-        return keycloakService.createUserInKeycloak(utente);
+    @PostMapping("/create/users/keycloak")
+    public ResponseEntity<Utente> createUtenteKeycloak(@RequestBody Utente utente) {
+        try {
+            UtenteKeycloak utenteKeycloak = new UtenteKeycloak();
+            utenteKeycloak.setUsername(utente.getUsername());
+            utenteKeycloak.setEmail(utente.getEmail());
+            utenteKeycloak.setRole(utente.getRole());
+
+            ResponseEntity<Object> response = keycloakService.createUserInKeycloak(utenteKeycloak);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return ResponseEntity.ok(utenteService.saveUser(utente));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
+    @PutMapping("/utenti/{id}")
+    public ResponseEntity<Utente> updateUtente(@PathVariable Long id, @RequestBody Utente utenteDetails) {
+        Utente updatedUtente = utenteService.updateUtente(id, utenteDetails);
+        return updatedUtente != null ? ResponseEntity.ok(updatedUtente) : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/utenti/{email}")
+    public ResponseEntity<Void> deleteUtente(@PathVariable String email) {
+        boolean isDeleted = utenteService.deleteUtente(email);
+        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{username}")

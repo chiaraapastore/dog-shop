@@ -36,11 +36,10 @@ public class JwtUtils {
     // Metodo per generare il token JWT
     public String generateToken(Utente utente) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
-
         return JWT.create()
-                .withSubject(utente.getFirstName() != null ? utente.getFirstName() : "Unknown") // Usa il First Name come 'sub'
-                .withClaim("preferred_username", utente.getEmail() != null ? utente.getEmail() : "unknown@example.com")
-                .withClaim("user_id", utente.getId() != null ? utente.getId().toString() : "0") // Aggiunge l'ID utente come claim
+                .withSubject(utente.getUsername() != null ? utente.getUsername() : "Unknown")
+                .withClaim("username", utente.getUsername() != null ? utente.getUsername() : "Unknown")
+                .withClaim("user_id", utente.getId() != null ? utente.getId().toString() : "0")
                 .sign(algorithm);
     }
 }
