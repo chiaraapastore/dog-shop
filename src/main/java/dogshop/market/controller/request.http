@@ -1,0 +1,15 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+###
+
+### FEEDBACK
+POST http://localhost:8081/api/feedback/save
+Content-Type: application/json
+
+{
+  "email": "chiara@gmail.com",
+  "message": "Your app is so cool",
+  "rating": 5
+}
+###

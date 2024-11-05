@@ -1,0 +1,100 @@
+package dogshop.market.service;
+import dogshop.market.entity.Product;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import dogshop.market.entity.Category;
+import dogshop.market.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import jakarta.transaction.Transactional;
+
+import java.util.List;
+
+
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryService categoryService;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+        this.productRepository = productRepository;
+        this.categoryService = categoryService;
+    }
+
+
+    public Product createProduct(Product productDetails, Long categoryId) {
+        if (categoryId == null) {
+            throw new IllegalArgumentException("Category ID cannot be null");
+        }
+
+        Category category = categoryService.findCategoryById(categoryId);
+        productDetails.setCategory(category);
+
+        productDetails.setProductName(productDetails.getProductName());
+        productDetails.setPrice(productDetails.getPrice());
+        productDetails.setAvailableQuantity(productDetails.getAvailableQuantity());
+
+        return productRepository.save(productDetails);
+    }
+
+
+
+
+    @Transactional
+    public Product updateProduct(Long id, Product productDetails, Long categoryId) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        existingProduct.setProductName(productDetails.getProductName());
+        existingProduct.setPrice(productDetails.getPrice());
+        existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
+
+        Category category = categoryService.findCategoryById(categoryId);
+        existingProduct.setCategory(category);
+
+        return productRepository.save(existingProduct);
+    }
+
+
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    public Product findProductById(Long id) {
+        System.out.println("Looking for product with ID: " + id); // Log per debug
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+
+
+    public Page<Product> findAllProducts(int page, int size, String sortBy, String sortDir, String category) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+        if (category != null && !category.isEmpty()) {
+            return productRepository.findByCategory_CategoryName(category, pageable);
+        }
+        return productRepository.findAll(pageable);
+    }
+
+    @Transactional
+    public void updateAvailableQuantity(Long id, int quantity) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getAvailableQuantity() < quantity) {
+            throw new RuntimeException("Quantity not available");
+        }
+
+        product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
+        productRepository.save(product);
+    }
+
+
+
+}
