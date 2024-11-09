@@ -48,7 +48,13 @@ public class CartService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Crea un nuovo oggetto Product per rappresentare l'aggiunta nel carrello
+        cart.getCartProducts().add(product);
+
+        // Salva il carrello aggiornato
         return cartRepository.save(cart);
     }
+
 
 }

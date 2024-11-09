@@ -1,7 +1,6 @@
 package dogshop.market.service;
 import dogshop.market.entity.Product;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import dogshop.market.entity.Category;
 import dogshop.market.repository.ProductRepository;
@@ -11,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
 
-import java.util.List;
 
 
 @Service
@@ -34,16 +32,14 @@ public class ProductService {
 
         Category category = categoryService.findCategoryById(categoryId);
         productDetails.setCategory(category);
-
+        category.setCountProduct(category.getCountProduct() + 1);
+        productDetails.setSizeProduct(productDetails.getSizeProduct());
         productDetails.setProductName(productDetails.getProductName());
         productDetails.setPrice(productDetails.getPrice());
         productDetails.setAvailableQuantity(productDetails.getAvailableQuantity());
 
         return productRepository.save(productDetails);
     }
-
-
-
 
     @Transactional
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
@@ -74,13 +70,19 @@ public class ProductService {
 
 
 
-    public Page<Product> findAllProducts(int page, int size, String sortBy, String sortDir, String category) {
+    public Page<Product> findAllProducts(int page, int size, String sortBy, String sortDir, String category, String sizeProduct) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
+
         if (category != null && !category.isEmpty()) {
             return productRepository.findByCategory_CategoryName(category, pageable);
+        } else if (sizeProduct != null && !sizeProduct.isEmpty()) {
+            return productRepository.findBySizeProduct(sizeProduct, pageable);
+        } else {
+            return productRepository.findAll(pageable);
         }
-        return productRepository.findAll(pageable);
     }
+
+
 
     @Transactional
     public void updateAvailableQuantity(Long id, int quantity) {
@@ -94,6 +96,8 @@ public class ProductService {
         product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
         productRepository.save(product);
     }
+
+
 
 
 

@@ -20,4 +20,6 @@ public class Category {
 
     private String categoryDescription;
 
+    private int countProduct;
+
 }

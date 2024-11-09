@@ -38,4 +38,6 @@ public class Product {
     private Category category;
 
     private String categoryName;
+
+    private String sizeProduct;
 }

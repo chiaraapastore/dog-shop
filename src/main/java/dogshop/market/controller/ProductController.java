@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
-    private final ProductRepository productRepository;
     private final UtenteShopService userService;
 
     @Autowired
-    public ProductController(ProductService productService, ProductRepository productRepository, UtenteShopService userService) {
+    public ProductController(ProductService productService, UtenteShopService userService) {
         this.productService = productService;
-        this.productRepository = productRepository;
         this.userService = userService;
     }
 
@@ -39,13 +37,13 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-   @PostMapping("/create/{categoryId}")
-   public ResponseEntity<Product> createProduct(@RequestBody Product productDetails, @PathVariable Long categoryId) {
+    @PostMapping("/create/{categoryId}")
+    public ResponseEntity<Product> createProduct(@RequestBody Product productDetails, @PathVariable Long categoryId) {
         String username = userService.getAuthenticatedUsername();
         System.out.println("Creating product for user: " + username);
         Product createdProduct = productService.createProduct(productDetails,categoryId);
         return ResponseEntity.ok(createdProduct);
-   }
+    }
 
 
     @GetMapping("/{id}")
@@ -61,9 +59,10 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "productName") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
-            @RequestParam(required = false)String category) {
+            @RequestParam(required = false)String category,
+            @RequestParam(value = "sizeProduct", required = false) String sizeProduct) {
 
-        Page<Product> products = productService.findAllProducts(page, size, sortBy, sortDir, category);
+        Page<Product> products = productService.findAllProducts(page, size, sortBy, sortDir, category, sizeProduct);
         return ResponseEntity.ok(products);
     }
 
