@@ -57,7 +57,7 @@ public class OrderController {
         double totalAmount = calcolaTotale(idProduct, quantityProduct);
         order.setTotalAmount(totalAmount);
 
-        CustomerOrder savedOrder = orderService.saveOrder(order);
+        CustomerOrder savedOrder = orderService.save(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
 

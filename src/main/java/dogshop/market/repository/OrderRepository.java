@@ -1,6 +1,7 @@
 package dogshop.market.repository;
 
 import dogshop.market.entity.CustomerOrder;
+import dogshop.market.entity.OrderProduct;
 import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
