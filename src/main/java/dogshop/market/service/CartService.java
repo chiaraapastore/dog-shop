@@ -1,43 +1,40 @@
 package dogshop.market.service;
 
+import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.Cart;
+import dogshop.market.entity.Category;
 import dogshop.market.entity.Product;
+import dogshop.market.entity.UtenteShop;
 import dogshop.market.repository.CartRepository;
 import dogshop.market.repository.ProductRepository;
+import dogshop.market.repository.UtenteShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class CartService {
 
     @Autowired
     private CartRepository cartRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
     @Autowired
     private AuthenticationService authenticationService;
     @Autowired
     private UtenteShopRepository utenteShopRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
-
-
-    public Cart getCartByUserId(Long userId) {
-        return cartRepository.findCartWithProductsByUserId(userId)
-                .orElseGet(() -> createCart(userId));
-    }
-
-   public Cart getCartByUser() {
+    public Cart getCartByUser() {
         UtenteShop currentUser = utenteShopRepository.findByUsername(authenticationService.getUsername());
         return cartRepository.findCartWithProductsByUtenteShop(currentUser);
     }
 
 
+
     public Cart addProductToCart(Long productId, int quantity) {
         //con questo ti recuperi l'utente corrente che ha fatto login
-        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+              
 
         // qui prendi il prodotto tramite l'id
         Product product = productRepository.findById(productId)
@@ -52,7 +49,7 @@ public class CartService {
 
         // qua aggiungo il prodotto al carrello
         product.setAvailableQuantity(quantity);
-        cart.getProducts().add(product);
+        cart.getCartProducts().add(product);
 
         // qua salvo il carrello
         return cartRepository.save(cart);
