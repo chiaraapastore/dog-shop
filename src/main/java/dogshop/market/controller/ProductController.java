@@ -24,9 +24,6 @@ public class ProductController {
 
     @PutMapping("/{id}/{categoryId}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails, @PathVariable Long categoryId) {
-        String username = userService.getAuthenticatedUsername();
-        System.out.println("Updating product for user: " + username);
-
         Product updatedProduct = productService.updateProduct(id, productDetails, categoryId);
         return ResponseEntity.ok(updatedProduct);
     }
@@ -39,8 +36,6 @@ public class ProductController {
 
     @PostMapping("/create/{categoryId}")
     public ResponseEntity<Product> createProduct(@RequestBody Product productDetails, @PathVariable Long categoryId) {
-        String username = userService.getAuthenticatedUsername();
-        System.out.println("Creating product for user: " + username);
         Product createdProduct = productService.createProduct(productDetails,categoryId);
         return ResponseEntity.ok(createdProduct);
     }

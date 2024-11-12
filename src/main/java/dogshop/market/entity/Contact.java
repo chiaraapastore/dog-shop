@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class ContactRequest {
+public class Contact {
     @Id
     private Long id;
     private String name;

@@ -5,6 +5,7 @@ import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.service.KeycloakService;
 import dogshop.market.service.UtenteShopService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +20,13 @@ public class UtenteShopController {
 
     private final KeycloakService keycloakService;
     private final UtenteShopService utenteShopService;
-    private final AuthenticationService authenticationService;
 
     @Autowired
-    public UtenteShopController(KeycloakService keycloakService, UtenteShopService utenteShopService, AuthenticationService authenticationService) {
+    public UtenteShopController(KeycloakService keycloakService, UtenteShopService utenteShopService) {
         this.keycloakService = keycloakService;
         this.utenteShopService = utenteShopService;
-        this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UtenteShop> registerUser(@RequestBody UtenteShop user) {
-        UtenteShop savedUser = utenteShopService.saveUser(user);
-        return ResponseEntity.ok(savedUser);
-    }
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
@@ -54,29 +48,14 @@ public class UtenteShopController {
         }
     }
 
-    @GetMapping("/user-info")
-    public ResponseEntity<String> getUserInfo() {
-        String userId = authenticationService.getUserId();
-        return ResponseEntity.ok("User ID: " + userId);
+
+    @GetMapping("/userDetails")
+    public ResponseEntity<Object> getUserDetails() {
+        try {
+            UtenteShop utenteShop = utenteShopService.getUserDetails();
+            return ResponseEntity.ok(utenteShop);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Utente non trovato");
+        }
     }
-
-    @GetMapping("/users")
-    public ResponseEntity<List<UtenteShop>> getAllUtenti() {
-        List<UtenteShop> utenti = utenteShopService.getAllUtenti();
-        return ResponseEntity.ok(utenti);
-    }
-
-
-    @PutMapping("/utenti/{id}")
-    public ResponseEntity<UtenteShop> updateUtente(@PathVariable Long id, @RequestBody UtenteShop utenteShopDetails) {
-        UtenteShop updatedUtenteShop = utenteShopService.updateUtente(id, utenteShopDetails);
-        return updatedUtenteShop != null ? ResponseEntity.ok(updatedUtenteShop) : ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/utenti/{email}")
-    public ResponseEntity<Void> deleteUtente(@PathVariable String email) {
-        boolean isDeleted = utenteShopService.deleteUtente(email);
-        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
-    }
-
 }

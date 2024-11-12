@@ -21,35 +21,22 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utente_shop_id", nullable = false)
     private UtenteShop utenteShop;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
 
     @NotNull(message = "Order date is required")
     private LocalDate orderDate;
 
     private String status;
-
     private double totalAmount;
 
-    // Dichiarazione della lista orderProducts
-    @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderProduct> orderProducts = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
 
-    // Metodo per aggiungere un OrderProduct all'ordine
-    public void addOrderProduct(OrderProduct orderProduct) {
-        this.orderProducts.add(orderProduct);
-        orderProduct.setCustomerOrder(this); // Imposta la relazione bidirezionale
-    }
+    private String orderNumber;
 
-    // Metodo per calcolare il totale dell'ordine
-    public void calculateTotalAmount() {
-        this.totalAmount = orderProducts.stream()
-                .mapToDouble(op -> op.getProduct().getPrice() * op.getQuantity())
-                .sum();
-    }
 }

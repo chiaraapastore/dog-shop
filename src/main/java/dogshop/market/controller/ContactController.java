@@ -1,6 +1,6 @@
 package dogshop.market.controller;
 // ContactController.java
-import dogshop.market.entity.ContactRequest;
+import dogshop.market.entity.Contact;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 public class ContactController {
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendContactMessage(@RequestBody ContactRequest contactRequest) {
+    public ResponseEntity<String> sendContactMessage(@RequestBody Contact contactRequest) {
         // Logica per gestire il messaggio (es. invio email o salvataggio su database)
         System.out.println("Messaggio ricevuto:");
         System.out.println("Nome: " + contactRequest.getName());

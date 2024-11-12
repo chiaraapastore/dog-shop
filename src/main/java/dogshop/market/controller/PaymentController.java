@@ -15,13 +15,8 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<Payment> getPaymentByOrderId(@PathVariable Long orderId) {
-        Payment payment = paymentService.getPaymentByOrderId(orderId);
-        return ResponseEntity.ok(payment);
-    }
 
-    @PostMapping("/create")
+    @PostMapping("/createPayment")
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
         Payment savedPayment = paymentService.savePayment(payment);
         return new ResponseEntity<>(savedPayment, HttpStatus.CREATED);

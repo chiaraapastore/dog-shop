@@ -1,15 +1,16 @@
 package dogshop.market.service;
 
 import dogshop.market.config.AuthenticationService;
-import dogshop.market.entity.Cart;
-import dogshop.market.entity.Category;
-import dogshop.market.entity.Product;
-import dogshop.market.entity.UtenteShop;
+import dogshop.market.entity.*;
+import dogshop.market.repository.CartProductRepository;
 import dogshop.market.repository.CartRepository;
 import dogshop.market.repository.ProductRepository;
 import dogshop.market.repository.UtenteShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -23,36 +24,80 @@ public class CartService {
     private UtenteShopRepository utenteShopRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CartProductRepository cartProductRepository;
 
-    public Cart getCartByUser() {
-        UtenteShop currentUser = utenteShopRepository.findByUsername(authenticationService.getUsername());
-        return cartRepository.findCartWithProductsByUtenteShop(currentUser);
+
+    public List<Product> getProductsInCart() {
+        // Recupero l'utente autenticato
+        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+
+        Cart cart = cartRepository.findByUtenteShop(utenteShop)
+                .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
+
+        List<CartProduct> cartProducts = cartProductRepository.findByCart(cart);
+
+        return cartProducts.stream()
+                .map(CartProduct::getProduct)
+                .collect(Collectors.toList());
     }
 
+    public Cart getCartByUser(UtenteShop utenteShop) {
+        return cartRepository.findByUtenteShop(utenteShop)
+                .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
+    }
 
 
     public Cart addProductToCart(Long productId, int quantity) {
-        //con questo ti recuperi l'utente corrente che ha fatto login
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
-              
 
-        // qui prendi il prodotto tramite l'id
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        // Qua o trovo il carrello se è già esistente o ne creo uno nuovo se è il primo
         Cart cart = cartRepository.findByUtenteShop(utenteShop).orElseGet(() -> {
             Cart newCart = new Cart();
             newCart.setUtenteShop(utenteShop);
-            return newCart;
+            return cartRepository.save(newCart);
         });
 
-        // qua aggiungo il prodotto al carrello
-        product.setAvailableQuantity(quantity);
-        cart.getCartProducts().add(product);
+        CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
+                .orElse(null);
 
-        // qua salvo il carrello
-        return cartRepository.save(cart);
+        if (cartProduct != null) {
+            cartProduct.setQuantity(cartProduct.getQuantity() + quantity);
+            cartProductRepository.save(cartProduct);
+        } else {
+            CartProductId cartProductId = new CartProductId(cart.getId(), product.getId());
+            cartProduct = new CartProduct();
+            cartProduct.setId(cartProductId);
+            cartProduct.setCart(cart);
+            cartProduct.setProduct(product);
+            cartProduct.setQuantity(quantity);
+            cartProductRepository.save(cartProduct);
+        }
+
+        return cart;
     }
+
+    public void removeProductFromCart(Long productId) {
+        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+
+        Cart cart = cartRepository.findByUtenteShop(utenteShop)
+                .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+
+        CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
+
+        cartProductRepository.delete(cartProduct);
+
+        List<CartProduct> remainingCartProducts = cartProductRepository.findByCart(cart);
+        if (remainingCartProducts.isEmpty()) {
+            cartRepository.delete(cart);
+        }
+    }
+
 
 }

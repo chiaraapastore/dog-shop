@@ -43,7 +43,4 @@ public class UtenteShop {
     @NotBlank(message = "Username is required")
     private String username;
 
-
-    @OneToMany(mappedBy = "utenteShop", cascade = CascadeType.ALL)
-    private List<CustomerOrder> orders;
 }

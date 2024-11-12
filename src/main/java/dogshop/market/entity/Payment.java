@@ -17,14 +17,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "order_id")
-    private CustomerOrder customerOrder;
     private LocalDate paymentDate;
 
-    @NotBlank(message = "Payment method is required")
     private String paymentMethod;
 
-    @NotBlank(message = "Status is required")
     private String status;
 }
