@@ -4,16 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.*;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class UtenteShop {
 
     @Id
@@ -31,9 +29,6 @@ public class UtenteShop {
     @Email(message = "Email should be valid")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password should be at least 6 characters")
-    private String password;
     @NotBlank(message = "Address is required")
     private String address;
     @Size(min = 10, message = "NumberCell should be at least 10 characters")
@@ -43,4 +38,59 @@ public class UtenteShop {
     @NotBlank(message = "Username is required")
     private String username;
 
+
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getKeycloakId() {
+        return keycloakId;
+    }
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
+    }
+    public String getFirstName() {
+        return firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    public String getNumberCell() {
+        return numberCell;
+    }
+    public void setNumberCell(String numberCell) {
+        this.numberCell = numberCell;
+    }
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
+        this.role = role;
+    }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 }

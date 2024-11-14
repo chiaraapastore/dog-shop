@@ -87,7 +87,6 @@ public class PaymentService {
 
         orderDetailRepository.saveAll(dettagliOrdine);
 
-        // elimino i prodotti dal carrello e il carrello
         cartProductRepository.deleteAll(prodottiCarrello);
         cartRepository.delete(carrello);
 

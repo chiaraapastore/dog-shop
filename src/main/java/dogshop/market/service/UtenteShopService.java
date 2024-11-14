@@ -3,14 +3,8 @@ package dogshop.market.service;
 import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.repository.UtenteShopRepository;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UtenteShopService {

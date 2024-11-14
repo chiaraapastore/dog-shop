@@ -1,11 +1,9 @@
 package dogshop.market.controller;
 
-import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.service.KeycloakService;
 import dogshop.market.service.UtenteShopService;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

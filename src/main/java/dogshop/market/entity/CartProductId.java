@@ -1,8 +1,12 @@
 package dogshop.market.entity;
 
 import jakarta.persistence.Embeddable;
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
+@Getter
+@Setter
 @Embeddable
 public class CartProductId implements Serializable {
 

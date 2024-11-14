@@ -1,14 +1,14 @@
 package dogshop.market.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
+
 public class CartProduct {
 
     @EmbeddedId
@@ -23,4 +23,37 @@ public class CartProduct {
     private Product product;
 
     private int quantity;
+
+
+    public CartProductId getId() {
+        return id;
+    }
+    public void setId(CartProductId id) {
+        this.id = id;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
 }

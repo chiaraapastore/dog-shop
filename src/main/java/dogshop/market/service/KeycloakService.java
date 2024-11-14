@@ -8,9 +8,7 @@ import dogshop.market.entity.UtenteKeycloak;
 import dogshop.market.repository.UtenteShopRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import lombok.RequiredArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@RequiredArgsConstructor
 public class KeycloakService {
 
     @Autowired
@@ -45,6 +42,12 @@ public class KeycloakService {
 
     @Value("${keycloak.admin.client-secret}")
     private String clientSecretAdmin;
+
+    public KeycloakService( KeycloakClient keycloakClient, UtenteShopRepository utenteShopRepository) {
+        this.keycloakClient = keycloakClient;
+        this.utenteShopRepository = utenteShopRepository;
+    }
+
 
     public String login(String username, String password) {
         TokenRequest tokenRequest = new TokenRequest(username, password, clientIdAdmin, clientSecretAdmin, "password");
@@ -100,7 +103,6 @@ public class KeycloakService {
 
             List<RoleKeycloak> roleList = rolesResponse.getBody();
 
-            // Log dei ruoli disponibili
             System.out.println("Ruoli disponibili per il client:");
             roleList.forEach(r -> System.out.println("Ruolo: " + r.getRole()));
 
@@ -145,12 +147,6 @@ public class KeycloakService {
         keycloak.setFirstName(utenteShop.getFirstName());
         keycloak.setLastName(utenteShop.getLastName());
         keycloak.setEmail(utenteShop.getEmail());
-
-        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
-        credentialRepresentation.setValue(utenteShop.getPassword());
-        credentialRepresentation.setTemporary(false);
-
-        keycloak.setCredentials(List.of(credentialRepresentation));
         keycloak.setEnabled(true);
 
         return keycloak;

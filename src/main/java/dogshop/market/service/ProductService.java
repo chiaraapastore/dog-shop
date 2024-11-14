@@ -1,5 +1,6 @@
 package dogshop.market.service;
 import dogshop.market.entity.Product;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import dogshop.market.entity.Category;
@@ -25,6 +26,7 @@ public class ProductService {
     }
 
 
+    @Transactional
     public Product createProduct(Product productDetails, Long categoryId) {
         if (categoryId == null) {
             throw new IllegalArgumentException("Category ID cannot be null");
@@ -32,6 +34,7 @@ public class ProductService {
 
         Category category = categoryService.findCategoryById(categoryId);
         productDetails.setCategory(category);
+
         category.setCountProduct(category.getCountProduct() + 1);
         productDetails.setSizeProduct(productDetails.getSizeProduct());
         productDetails.setProductName(productDetails.getProductName());
@@ -41,20 +44,26 @@ public class ProductService {
         return productRepository.save(productDetails);
     }
 
+
     @Transactional
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        try {
+            Product existingProduct = productRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        existingProduct.setProductName(productDetails.getProductName());
-        existingProduct.setPrice(productDetails.getPrice());
-        existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
+            existingProduct.setProductName(productDetails.getProductName());
+            existingProduct.setPrice(productDetails.getPrice());
+            existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
 
-        Category category = categoryService.findCategoryById(categoryId);
-        existingProduct.setCategory(category);
+            Category category = categoryService.findCategoryById(categoryId);
+            existingProduct.setCategory(category);
 
-        return productRepository.save(existingProduct);
+            return productRepository.save(existingProduct);
+        } catch (OptimisticLockException e) {
+            throw new RuntimeException("Product was modified by another transaction. Please reload and try again.");
+        }
     }
+
 
 
 

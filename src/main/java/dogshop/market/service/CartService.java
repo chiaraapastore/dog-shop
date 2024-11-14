@@ -74,6 +74,7 @@ public class CartService {
         return cart;
     }
 
+
     public void removeProductFromCart(Long productId) {
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
 

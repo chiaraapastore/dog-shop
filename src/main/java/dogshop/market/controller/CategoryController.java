@@ -1,6 +1,5 @@
 package dogshop.market.controller;
 import dogshop.market.entity.Category;
-import dogshop.market.entity.Product;
 import dogshop.market.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
