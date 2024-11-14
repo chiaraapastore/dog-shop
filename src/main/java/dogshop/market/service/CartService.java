@@ -29,7 +29,7 @@ public class CartService {
 
 
     public List<Product> getProductsInCart() {
-        // Recupero l'utente autenticato
+
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
 
         Cart cart = cartRepository.findByUtenteShop(utenteShop)
@@ -40,11 +40,6 @@ public class CartService {
         return cartProducts.stream()
                 .map(CartProduct::getProduct)
                 .collect(Collectors.toList());
-    }
-
-    public Cart getCartByUser(UtenteShop utenteShop) {
-        return cartRepository.findByUtenteShop(utenteShop)
-                .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
     }
 
 

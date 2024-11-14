@@ -10,13 +10,11 @@ public class ContactController {
 
     @PostMapping("/send")
     public ResponseEntity<String> sendContactMessage(@RequestBody Contact contactRequest) {
-        // Logica per gestire il messaggio (es. invio email o salvataggio su database)
         System.out.println("Messaggio ricevuto:");
         System.out.println("Nome: " + contactRequest.getName());
         System.out.println("Email: " + contactRequest.getEmail());
         System.out.println("Telefono: " + contactRequest.getPhoneNumber());
         System.out.println("Messaggio: " + contactRequest.getMessage());
-
         return ResponseEntity.ok("Messaggio inviato con successo!");
     }
 }

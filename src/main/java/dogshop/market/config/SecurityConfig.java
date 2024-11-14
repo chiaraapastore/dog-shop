@@ -35,10 +35,6 @@ public class SecurityConfig {
                         (authorize) -> authorize.anyRequest().permitAll()
                 )
                 .csrf((csrf) -> csrf.disable())
-
-                // fixme
-                // here we are allowing cors from everywhere
-                // could be security issue, let's leave here this comment
                 .cors((cors) -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.addAllowedOriginPattern("*");
@@ -59,7 +55,6 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        // Remove the SCOPE_ prefix
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(keycloakJwtTokenConverter);

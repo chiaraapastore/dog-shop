@@ -16,8 +16,11 @@ public class TokenRequest {
     @Size(min = 6, message = "Password should be at least 6 characters")
     private String password;
 
+    @NotBlank(message = "Client ID is required")
     private String client_id;
     private String client_secret;
+
+    @NotBlank(message = "Grant type is required")
     private String grant_type;
 
     public TokenRequest(String username, String password, String client_id, String client_secret, String grant_type) {

@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +32,6 @@ public class KeycloakJwtTokenConverter implements Converter<Jwt, Collection<Gran
         LinkedList<GrantedAuthority> result = new LinkedList<>();
 
         try {
-            // Gestione dei ruoli a livello di risorsa
             Map<String, Object> resourceAccess = jwt.getClaimAsMap(RESOURCE_ACCESS);
             if (resourceAccess != null) {
                 Map<String, Object> clientIdMap = (Map<String, Object>) resourceAccess.get(properties.getResourceId());
@@ -48,7 +46,6 @@ public class KeycloakJwtTokenConverter implements Converter<Jwt, Collection<Gran
                 }
             }
 
-            // Gestione dei ruoli a livello di realm
             Map<String, Object> realmAccess = jwt.getClaimAsMap(REALM_ACCESS);
             if (realmAccess != null) {
                 List<String> realmRoles = (List<String>) realmAccess.get(ROLES);

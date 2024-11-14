@@ -1,7 +1,6 @@
 package dogshop.market.controller;
 
 import dogshop.market.entity.Product;
-import dogshop.market.repository.ProductRepository;
 import dogshop.market.service.ProductService;
 import dogshop.market.service.UtenteShopService;
 import org.springframework.beans.factory.annotation.Autowired;

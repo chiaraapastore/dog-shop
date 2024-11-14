@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class CartProduct {
 
     @EmbeddedId
-    private CartProductId id; //chiave composta, id del carrello e id del prodotto
+    private CartProductId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("cartId")

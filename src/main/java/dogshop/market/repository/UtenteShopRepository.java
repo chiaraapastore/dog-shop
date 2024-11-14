@@ -10,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface UtenteShopRepository extends JpaRepository<UtenteShop, Long> {
-    UtenteShop findByEmail(String username);
-    void deleteByEmail(String email);
     Optional<UtenteShop> findById(Long id);
     UtenteShop findByUsername(String username);
 

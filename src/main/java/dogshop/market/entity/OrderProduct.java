@@ -18,7 +18,7 @@ public class OrderProduct {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_order_id", nullable = false)
-    private CustomerOrder customerOrder;  // Riferimento unidirezionale all'ordine
+    private CustomerOrder customerOrder;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)

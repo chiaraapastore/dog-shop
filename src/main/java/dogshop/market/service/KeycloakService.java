@@ -151,7 +151,7 @@ public class KeycloakService {
         credentialRepresentation.setTemporary(false);
 
         keycloak.setCredentials(List.of(credentialRepresentation));
-        keycloak.setEnabled(false); // Imposto a true se voglio abilitare l'account immediatamente
+        keycloak.setEnabled(true);
 
         return keycloak;
     }

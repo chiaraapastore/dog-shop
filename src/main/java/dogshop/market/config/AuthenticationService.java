@@ -26,15 +26,4 @@ public class AuthenticationService {
         }
     }
 
-
-    public String getUserId() {
-        try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-            String token = request.getHeader("Authorization").split(" ")[1];
-            return JwtUtils.getIdFromToken(token);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "No_id";
-        }
-    }
 }
