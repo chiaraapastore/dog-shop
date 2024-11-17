@@ -66,7 +66,6 @@ public class ProductService {
 
 
 
-
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
@@ -82,10 +81,12 @@ public class ProductService {
     public Page<Product> findAllProducts(int page, int size, String sortBy, String sortDir, String category, String sizeProduct) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
 
-        if (category != null && !category.isEmpty()) {
+        if (category != null && !category.isEmpty() && sizeProduct != null && !sizeProduct.isEmpty()) {
+            return productRepository.findBySizeProduct(sizeProduct, pageable, category);
+        } else if (category != null && !category.isEmpty()) {
             return productRepository.findByCategory_CategoryName(category, pageable);
         } else if (sizeProduct != null && !sizeProduct.isEmpty()) {
-            return productRepository.findBySizeProduct(sizeProduct, pageable);
+            return productRepository.findBySizeProduct(sizeProduct, pageable, category);
         } else {
             return productRepository.findAll(pageable);
         }
@@ -94,20 +95,19 @@ public class ProductService {
 
 
     @Transactional
-    public void updateAvailableQuantity(Long id, int quantity) {
-        Product product = productRepository.findById(id)
+    public void updateAvailableQuantity(Long productId, int quantityChange) {
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (product.getAvailableQuantity() < quantity) {
+        int newQuantity = product.getAvailableQuantity() - quantityChange;
+
+        if (newQuantity < 0) {
             throw new RuntimeException("Quantity not available");
         }
 
-        product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
+        product.setAvailableQuantity(newQuantity);
         productRepository.save(product);
     }
-
-
-
 
 
 }

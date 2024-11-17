@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
 
 public class CartProduct {
 
@@ -18,7 +16,7 @@ public class CartProduct {
     @MapsId("cartId")
     private Cart cart;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @MapsId("productId")
     private Product product;
 

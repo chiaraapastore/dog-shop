@@ -3,11 +3,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+
 
 public class Cart {
     @Id
@@ -16,6 +14,7 @@ public class Cart {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utente_id", nullable = false)
     private UtenteShop utenteShop;
+
 
     public Long getId() {
         return id;

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByCategory_CategoryName(String categoryName, Pageable pageable);
-    @Query("SELECT p FROM Product p WHERE p.sizeProduct = :sizeProduct")
-    Page<Product> findBySizeProduct(@Param("sizeProduct")String sizeProduct, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE (:category IS NULL OR p.category.categoryName = :category) AND (:sizeProduct IS NULL OR p.sizeProduct = :sizeProduct)")
+    Page<Product> findBySizeProduct(@Param("sizeProduct") String sizeProduct, Pageable pageable, @Param("category") String category);
+
 }

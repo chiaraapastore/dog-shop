@@ -7,10 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
-@Data
 @NoArgsConstructor
-@Getter
-@Setter
 
 public class Contact {
     @Id

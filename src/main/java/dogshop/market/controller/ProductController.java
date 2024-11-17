@@ -55,6 +55,8 @@ public class ProductController {
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false)String category,
             @RequestParam(value = "sizeProduct", required = false) String sizeProduct) {
+        System.out.println("Category: " + category);
+        System.out.println("Size Product: " + sizeProduct);
 
         Page<Product> products = productService.findAllProducts(page, size, sortBy, sortDir, category, sizeProduct);
         return ResponseEntity.ok(products);

@@ -6,11 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Product {
 
     @Id

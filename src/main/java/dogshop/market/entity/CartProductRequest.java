@@ -2,10 +2,8 @@ package dogshop.market.entity;
 
 import lombok.*;
 
-@Data
+
 @NoArgsConstructor
-@Getter
-@Setter
 public class CartProductRequest {
     private Long productId;
     private int quantity;

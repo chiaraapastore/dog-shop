@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 public class CartService {
 
@@ -27,9 +26,7 @@ public class CartService {
     @Autowired
     private CartProductRepository cartProductRepository;
 
-
     public List<Product> getProductsInCart() {
-
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
 
         Cart cart = cartRepository.findByUtenteShop(utenteShop)
@@ -42,12 +39,14 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
-
     public Cart addProductToCart(Long productId, int quantity) {
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+        if (utenteShop == null) {
+            throw new IllegalArgumentException("Utente non trovato");
+        }
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
 
         Cart cart = cartRepository.findByUtenteShop(utenteShop).orElseGet(() -> {
             Cart newCart = new Cart();
@@ -74,26 +73,34 @@ public class CartService {
         return cart;
     }
 
-
     public void removeProductFromCart(Long productId) {
-        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+        try {
+            UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+            if (utenteShop == null) {
+                throw new IllegalArgumentException("Utente non trovato");
+            }
 
-        Cart cart = cartRepository.findByUtenteShop(utenteShop)
-                .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
+            Cart cart = cartRepository.findByUtenteShop(utenteShop)
+                    .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
 
-        CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
-                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
+            CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
+                    .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
 
-        cartProductRepository.delete(cartProduct);
+            System.out.println("Rimuovendo il prodotto dal carrello: " + productId);
+            cartProductRepository.delete(cartProduct);
 
-        List<CartProduct> remainingCartProducts = cartProductRepository.findByCart(cart);
-        if (remainingCartProducts.isEmpty()) {
-            cartRepository.delete(cart);
+            List<CartProduct> remainingCartProducts = cartProductRepository.findByCart(cart);
+            if (remainingCartProducts.isEmpty()) {
+                System.out.println("Carrello vuoto. Eliminazione del carrello.");
+                cartRepository.delete(cart);
+            }
+        } catch (Exception e) {
+            System.err.println("Errore durante la rimozione del prodotto: " + e.getMessage());
+            throw e;
         }
     }
-
 
 }

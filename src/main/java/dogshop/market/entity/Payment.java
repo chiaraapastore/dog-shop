@@ -3,16 +3,11 @@ package dogshop.market.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-
 import java.time.LocalDate;
 
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Getter
-@Setter
 public class Payment {
 
     @Id

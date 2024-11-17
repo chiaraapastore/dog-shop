@@ -7,11 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+
 public class UtenteShop {
 
     @Id
