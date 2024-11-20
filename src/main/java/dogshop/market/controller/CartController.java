@@ -13,8 +13,11 @@ import java.util.List;
 @RequestMapping("/api/cart")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     @GetMapping("/cart-with-products")
     public ResponseEntity<List<Product>> getCartWithProducts() {

@@ -2,12 +2,10 @@ package dogshop.market.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
 import java.time.LocalDate;
 
 
 @Entity
-@NoArgsConstructor
 public class Payment {
 
     @Id
@@ -27,6 +25,8 @@ public class Payment {
         this.paymentMethod = paymentMethod;
         this.status = status;
     }
+
+    public Payment(){}
 
     public Long getId() {
         return id;

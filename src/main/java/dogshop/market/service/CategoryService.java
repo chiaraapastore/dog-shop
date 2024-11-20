@@ -3,7 +3,6 @@ package dogshop.market.service;
 
 import dogshop.market.entity.Category;
 import dogshop.market.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +14,6 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    @Autowired
     public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }

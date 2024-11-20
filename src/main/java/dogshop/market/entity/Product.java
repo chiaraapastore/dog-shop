@@ -36,6 +36,7 @@ public class Product {
     @Version
     private Integer version;
 
+
     public Long getId() {
         return id;
     }

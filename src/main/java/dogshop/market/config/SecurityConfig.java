@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import springfox.documentation.service.OAuth;
 
 @Configuration
 @EnableWebSecurity
@@ -32,23 +33,24 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(
-                        (authorize) -> authorize.anyRequest().permitAll()
+                        (authorize) -> authorize.requestMatchers("/api/cart/**").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .csrf((csrf) -> csrf.disable())
-                .cors((cors) -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOriginPattern("*");
-                    config.addAllowedHeader("*");
-                    config.addAllowedMethod("*");
-                    return config;
-                }))
                 .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer((OAuth2) -> OAuth2.jwt(Customizer.withDefaults()))
-                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer((OAuth2)-> OAuth2.jwt(Customizer.withDefaults()))
+                .sessionManagement((session)->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                );
+                )
+                .cors((cors) -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.addAllowedOrigin("http://localhost:4200");
+                    config.addAllowedHeader("*");
+                    config.addAllowedMethod("*");
+                    return config;
+                }));
         return http.build();
     }
 

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 @Service
 public class KeycloakService {
 
-    @Autowired
     private final KeycloakClient keycloakClient;
     private final UtenteShopRepository utenteShopRepository;
 

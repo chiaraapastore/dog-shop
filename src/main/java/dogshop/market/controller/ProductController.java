@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -63,13 +64,18 @@ public class ProductController {
     }
 
 
-    @PutMapping("/update-quantity/{id}")
-    public ResponseEntity<Void> updateAvailableQuantity(
-            @PathVariable Long id,
-            @RequestParam int quantity) {
-        productService.updateAvailableQuantity(id, quantity);
-        return ResponseEntity.ok().build();
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
+        List<Product> products = productService.searchProducts(keyword);
+        return ResponseEntity.ok(products);
     }
 
-
+    @PutMapping("/update-cart-product")
+    public ResponseEntity<Void> updateCartProductQuantity(
+            @RequestParam Long cartId,
+            @RequestParam Long productId,
+            @RequestParam int quantityChange) {
+        productService.updateProductQuantityInCart(productId, cartId, quantityChange);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,16 +1,18 @@
 package dogshop.market.service;
+import dogshop.market.entity.CartProduct;
 import dogshop.market.entity.Product;
+import dogshop.market.repository.CartProductRepository;
 import jakarta.persistence.OptimisticLockException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import dogshop.market.entity.Category;
 import dogshop.market.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 
 
 @Service
@@ -18,11 +20,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final CartProductRepository cartProductRepository;
 
-    @Autowired
-    public ProductService(ProductRepository productRepository, CategoryService categoryService) {
+    public ProductService(ProductRepository productRepository, CategoryService categoryService, CartProductRepository cartProductRepository) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.cartProductRepository = cartProductRepository;
     }
 
 
@@ -95,18 +98,38 @@ public class ProductService {
 
 
     @Transactional
-    public void updateAvailableQuantity(Long productId, int quantityChange) {
+    public void updateProductQuantityInCart(Long productId, Long cartId, int quantityChange) {
+        CartProduct cartProduct = cartProductRepository.findByCartIdAndProductId(cartId, productId)
+                .orElseThrow(() -> new RuntimeException("Product not found in cart"));
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        int newQuantity = product.getAvailableQuantity() - quantityChange;
+        int newAvailableQuantity = product.getAvailableQuantity() - quantityChange;
 
-        if (newQuantity < 0) {
-            throw new RuntimeException("Quantity not available");
+        if (newAvailableQuantity < 0) {
+            throw new RuntimeException("Not enough stock available");
         }
 
-        product.setAvailableQuantity(newQuantity);
+        product.setAvailableQuantity(newAvailableQuantity);
         productRepository.save(product);
+
+        int newCartQuantity = cartProduct.getQuantity() + quantityChange;
+
+        if (newCartQuantity <= 0) {
+            cartProductRepository.delete(cartProduct);
+        } else {
+            cartProduct.setQuantity(newCartQuantity);
+            cartProductRepository.save(cartProduct);
+        }
+    }
+
+    public List<Product> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return productRepository.findAll();
+        } else {
+            return productRepository.findByProductNameContainingIgnoreCase(keyword);
+        }
     }
 
 

@@ -29,7 +29,7 @@ public class CustomerOrder {
     private String status;
     private double totalAmount;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "payment_id")
     private Payment payment;
 

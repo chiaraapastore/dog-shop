@@ -3,7 +3,6 @@ package dogshop.market.service;
 import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.*;
 import dogshop.market.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,24 +14,27 @@ import java.util.List;
 @Service
 public class PaymentService {
 
-    @Autowired
-    private PaymentRepository paymentRepository;
-    @Autowired
-    private CustomerOrderRepository customerOrderRepository;
-    @Autowired
-    private CartProductRepository cartProductRepository;
-    @Autowired
-    private AuthenticationService authenticationService;
-    @Autowired
-    private UtenteShopRepository utenteShopRepository;
-    @Autowired
-    private CartRepository cartRepository;
-    @Autowired
-    private OrderDetailRepository orderDetailRepository;
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final PaymentRepository paymentRepository;
+    private final CustomerOrderRepository customerOrderRepository;
+    private final CartProductRepository cartProductRepository;
+    private final AuthenticationService authenticationService;
+    private final UtenteShopRepository utenteShopRepository;
+    private final CartRepository cartRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+
+    public PaymentService(PaymentRepository paymentRepository, CustomerOrderRepository customerOrderRepository, CartProductRepository cartProductRepository, AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, CartRepository cartRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, CategoryRepository categoryRepository) {
+        this.paymentRepository = paymentRepository;
+        this.customerOrderRepository = customerOrderRepository;
+        this.cartProductRepository = cartProductRepository;
+        this.authenticationService = authenticationService;
+        this.utenteShopRepository = utenteShopRepository;
+        this.cartRepository = cartRepository;
+        this.orderDetailRepository = orderDetailRepository;
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+    }
 
     @Transactional
     public Payment savePayment(Payment pagamento) {

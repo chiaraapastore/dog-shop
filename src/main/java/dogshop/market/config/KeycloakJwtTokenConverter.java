@@ -51,7 +51,7 @@ public class KeycloakJwtTokenConverter implements Converter<Jwt, Collection<Gran
                 List<String> realmRoles = (List<String>) realmAccess.get(ROLES);
                 if (realmRoles != null) {
                     Collection<GrantedAuthority> realmAuthorities = realmRoles.stream()
-                            .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
+                             .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
                             .collect(Collectors.toList());
                     result.addAll(realmAuthorities);
                 }

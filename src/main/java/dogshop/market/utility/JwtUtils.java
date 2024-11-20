@@ -18,7 +18,7 @@ public class JwtUtils {
             DecodedJWT decodedJWT = JWT.decode(token);
             return decodedJWT.getClaim("preferred_username").asString();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Errore nella decodifica del token: " + e.getMessage());
             return "";
         }
     }
