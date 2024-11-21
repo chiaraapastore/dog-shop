@@ -29,12 +29,29 @@ public class CustomerOrderService {
     }
 
     @Transactional
-    public void cancelOrder(Long orderId) {
-        CustomerOrder order = customerOrderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        order.setStatus("Cancelled");
-        customerOrderRepository.save(order);
+public void cancelOrder(Long orderId) {
+    CustomerOrder order = customerOrderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
+
+    // elimino dalla tabella orderProduct
+    List<OrderProduct> orderProducts = order.getOrderProducts(); 
+    if (orderProducts != null) {
+        for (OrderProduct orderProduct : orderProducts) {
+            orderProductRepository.delete(orderProduct); 
+        }
     }
+
+    // elimino il pagamento associato all'ordine
+    if (order.getPayment() != null) {
+        paymentRepository.delete(order.getPayment()); 
+    }
+
+    // ed elimino l'ordine con il dettaglio dalla 
+    orderDetailRepository.deleteByCustomerOrderId(orderId); 
+    // dopo aver dissociato/eliminato gli ordini dalle altre tabelle elimino l'ordine che voglio cancellare
+    customerOrderRepository.delete(order);
+}
+
 
 
 
