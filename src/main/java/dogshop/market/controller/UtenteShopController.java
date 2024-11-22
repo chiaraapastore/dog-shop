@@ -10,7 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/utente")
@@ -27,13 +28,13 @@ public class UtenteShopController {
 
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(@RequestBody UtenteShop utenteShop) {
-        try {
-            UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
-            return ResponseEntity.ok(savedUser);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Utente registrato con successo");
+        response.put("user", savedUser);
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
@@ -50,8 +51,6 @@ public class UtenteShopController {
         try {
             UtenteShop savedUtenteShop = keycloakService.createUtenteInKeycloak(utenteShop);
             return ResponseEntity.ok(savedUtenteShop);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -64,8 +63,18 @@ public class UtenteShopController {
             UtenteShop utenteShop = utenteShopService.getUserDetails();
             return ResponseEntity.ok(utenteShop);
         } catch (RuntimeException e) {
-            System.err.println("Errore nel recupero dei dettagli utente: " + e.getMessage());
             return ResponseEntity.status(404).body("Utente non trovato");
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String authorization) {
+        try {
+            keycloakService.logout(authorization);
+            return ResponseEntity.ok(Map.of("message", "Logout effettuato con successo"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Errore durante il logout: " + e.getMessage()));
         }
     }
 

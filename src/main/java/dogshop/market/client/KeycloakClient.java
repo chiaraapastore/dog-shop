@@ -26,6 +26,13 @@ public interface KeycloakClient {
             @RequestParam("client_secret") String clientSecret);
 
     @RequestMapping(method = RequestMethod.POST,
+            value = "/realms/${keycloak.realm}/protocol/openid-connect/logout",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    ResponseEntity<Void> logout(@RequestParam("refresh_token") String refreshToken,
+                                @RequestParam("client_id") String clientId,
+                                @RequestParam("client_secret") String clientSecret);
+
+    @RequestMapping(method = RequestMethod.POST,
             value = "/admin/realms/${keycloak.realm}/users",
             produces = "application/json")
     ResponseEntity<Object> createUsers(@RequestHeader("Authorization") String accessToken,
