@@ -163,40 +163,4 @@ public class KeycloakService {
         return keycloakClient.getAllUsers("Bearer " + accessToken);
     }
 
-
-    public void logout(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Token mancante o non valido");
-        }
-
-        // Estrai il token dal header
-        String accessToken = authorization.split(" ")[1];
-
-        try {
-            // Ottieni il refresh token corrispondente (opzionale, dipende dalla configurazione)
-            String refreshToken = extractRefreshToken(accessToken);
-
-            // Chiamata a Keycloak per invalidare i token
-            ResponseEntity<Void> response = keycloakClient.logout(refreshToken, clientIdAdmin, clientSecretAdmin);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("Errore nella revoca dei token in Keycloak");
-            }
-            System.out.println("Logout eseguito con successo per il token: " + accessToken);
-
-        } catch (Exception e) {
-            System.err.println("Errore durante il logout: " + e.getMessage());
-            throw new RuntimeException("Errore durante il logout", e);
-        }
-    }
-
-    private String extractRefreshToken(String accessToken) {
-        // Decodifica del token JWT per estrarre il refresh token, se necessario
-        String refreshToken = ""; // Implementazione specifica, dipende dalla configurazione
-        return refreshToken;
-    }
-
-
-
-
 }

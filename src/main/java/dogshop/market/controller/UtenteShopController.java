@@ -67,15 +67,5 @@ public class UtenteShopController {
         }
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String authorization) {
-        try {
-            keycloakService.logout(authorization);
-            return ResponseEntity.ok(Map.of("message", "Logout effettuato con successo"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Errore durante il logout: " + e.getMessage()));
-        }
-    }
 
 }
