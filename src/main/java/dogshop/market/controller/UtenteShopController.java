@@ -4,11 +4,9 @@ import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.service.KeycloakService;
 import dogshop.market.service.UtenteShopService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,42 +18,40 @@ public class UtenteShopController {
     private final KeycloakService keycloakService;
     private final UtenteShopService utenteShopService;
 
-    @Autowired
     public UtenteShopController(KeycloakService keycloakService, UtenteShopService utenteShopService) {
         this.keycloakService = keycloakService;
         this.utenteShopService = utenteShopService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Object> registerUser(@RequestBody UtenteShop utenteShop) {
-        UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody UtenteShop utenteShop) {
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Utente registrato con successo");
-        response.put("user", savedUser);
-        return ResponseEntity.ok(response);
+        try {
+            UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
+            response.put("message", "Utente registrato con successo");
+            response.put("user", savedUser);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("message", "Errore durante la registrazione");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
-
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody TokenRequest tokenRequest) {
+        Map<String, Object> response = new HashMap<>();
         try {
             String token = keycloakService.login(tokenRequest.getUsername(), tokenRequest.getPassword());
-            return ResponseEntity.ok(token);
+            response.put("message", "Login effettuato con successo");
+            response.put("token", token);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenziali non valide");
+            response.put("message", "Credenziali non valide");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
-
-    @PostMapping("/create/users/keycloak")
-    public ResponseEntity<Object> createUtenteKeycloak(@RequestBody UtenteShop utenteShop) {
-        try {
-            UtenteShop savedUtenteShop = keycloakService.createUtenteInKeycloak(utenteShop);
-            return ResponseEntity.ok(savedUtenteShop);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
 
     @GetMapping("/userDetails")
     public ResponseEntity<Object> getUserDetails() {
@@ -63,9 +59,7 @@ public class UtenteShopController {
             UtenteShop utenteShop = utenteShopService.getUserDetails();
             return ResponseEntity.ok(utenteShop);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("Utente non trovato");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
         }
     }
-
-
 }

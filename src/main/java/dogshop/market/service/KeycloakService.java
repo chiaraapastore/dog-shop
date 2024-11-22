@@ -13,8 +13,8 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import java.util.*;
 
+import java.util.*;
 
 @Service
 public class KeycloakService {
@@ -31,8 +31,6 @@ public class KeycloakService {
     @Value("${keycloak.admin.password}")
     private String adminPassword;
 
-    @Value("${keycloak.auth-server-url}")
-    private String urlKeycloak;
 
     @Value("${keycloak.admin.client-id}")
     private String clientIdAdmin;
@@ -40,11 +38,10 @@ public class KeycloakService {
     @Value("${keycloak.admin.client-secret}")
     private String clientSecretAdmin;
 
-    public KeycloakService( KeycloakClient keycloakClient, UtenteShopRepository utenteShopRepository) {
+    public KeycloakService(KeycloakClient keycloakClient, UtenteShopRepository utenteShopRepository) {
         this.keycloakClient = keycloakClient;
         this.utenteShopRepository = utenteShopRepository;
     }
-
 
     public String login(String username, String password) {
         TokenRequest tokenRequest = new TokenRequest(username, password, clientIdAdmin, clientSecretAdmin, "password");
@@ -55,52 +52,39 @@ public class KeycloakService {
             Map<String, Object> mapResponse = objectMapper.convertValue(responseEntity.getBody(), Map.class);
             return mapResponse.get("access_token").toString();
         } else {
-            throw new RuntimeException("Login failed with status: " + responseEntity.getStatusCode());
+            throw new RuntimeException("Login fallito: " + responseEntity.getStatusCode());
         }
     }
 
     @Transactional
     public UtenteShop createUtenteInKeycloak(UtenteShop utenteShop) {
-        if (utenteShop.getFirstName() == null || utenteShop.getLastName() == null || utenteShop.getUsername() == null) {
-            throw new IllegalArgumentException("I campi obbligatori non sono valorizzati.");
-        }
+        validateUtenteShop(utenteShop);
 
-        // Ottieni il token di amministrazione
-        String accessToken = getAdminAccessToken();
-        String authorizationHeader = "Bearer " + accessToken;
+        String adminToken = getAdminAccessToken();
 
-        // Controlla se l'utente esiste già in Keycloak
-        System.out.println("Verifica se l'utente esiste già in Keycloak...");
-        List<UserRepresentation> existingUsers = keycloakClient.getUsersByUsername(authorizationHeader, utenteShop.getUsername());
+        // Controlla se l'utente esiste già
+        List<UserRepresentation> existingUsers = keycloakClient.getUsersByUsername("Bearer " + adminToken, utenteShop.getUsername());
         if (!existingUsers.isEmpty()) {
             throw new RuntimeException("L'utente esiste già in Keycloak.");
         }
 
-        // Creazione dell'utente su Keycloak
-        System.out.println("Creazione dell'utente in Keycloak...");
+        // Crea l'utente in Keycloak
         UtenteKeycloak utenteKeycloak = convertToUtenteKeycloak(utenteShop);
-        ResponseEntity<Object> response = keycloakClient.createUsers(authorizationHeader, utenteKeycloak);
+        ResponseEntity<Object> response = keycloakClient.createUsers("Bearer " + adminToken, utenteKeycloak);
 
         if (response == null || !response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Errore durante la creazione dell'utente in Keycloak.");
         }
-        System.out.println("Utente creato in Keycloak con successo.");
 
-        // Recupera il Keycloak ID
-        String location = response.getHeaders().get("location").get(0);
-        String[] locationParts = location.split("/");
-        String keycloakId = locationParts[locationParts.length - 1];
+        // Recupera l'ID da Keycloak
+        String keycloakId = extractKeycloakIdFromResponse(response);
         utenteShop.setKeycloakId(keycloakId);
 
-        // Salva l'utente nel database
-        System.out.println("Salvo l'utente nel database...");
+        // Salva nel database
         UtenteShop savedUtenteShop = utenteShopRepository.save(utenteShop);
-        System.out.println("Utente salvato nel database: " + savedUtenteShop);
 
-        // Assegna ruoli su Keycloak
-        System.out.println("Assegnazione del ruolo...");
-        assignRolesToUser(authorizationHeader, keycloakId, utenteShop.getRole());
-        System.out.println("Ruolo assegnato con successo.");
+        // Assegna il ruolo
+        assignRolesToUser("Bearer " + adminToken, keycloakId, utenteShop.getRole());
 
         return savedUtenteShop;
     }
@@ -109,34 +93,14 @@ public class KeycloakService {
         ResponseEntity<List<RoleKeycloak>> rolesResponse = keycloakClient.getAvailableRoles(authorizationHeader, userId, "0", "100");
         List<RoleKeycloak> roleList = rolesResponse.getBody();
 
-        Optional<RoleKeycloak> selectedRoleOpt = roleList.stream()
+        RoleKeycloak selectedRole = roleList.stream()
                 .filter(r -> r.getRole().equals(role))
-                .findFirst();
-
-        if (selectedRoleOpt.isEmpty()) {
-            throw new RuntimeException("Ruolo non trovato: " + role);
-        }
-
-        RoleKeycloak selectedRole = selectedRoleOpt.get();
-        String clientIdRole = selectedRole.getClientId();
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Ruolo non trovato: " + role));
 
         List<RoleRepresentation> rolesToAssign = List.of(selectedRole.toRoleRepresentation());
-        keycloakClient.addRoleToUser(authorizationHeader, userId, clientIdRole, rolesToAssign);
+        keycloakClient.addRoleToUser(authorizationHeader, userId, selectedRole.getClientId(), rolesToAssign);
     }
-
-
-
-    private UtenteKeycloak convertToUtenteKeycloak(UtenteShop utenteShop) {
-        UtenteKeycloak keycloak = new UtenteKeycloak();
-        keycloak.setUsername(utenteShop.getUsername());
-        keycloak.setFirstName(utenteShop.getFirstName());
-        keycloak.setLastName(utenteShop.getLastName());
-        keycloak.setEmail(utenteShop.getEmail());
-        keycloak.setEnabled(true);
-        return keycloak;
-    }
-
-
 
     public String getAdminAccessToken() {
         try {
@@ -155,12 +119,27 @@ public class KeycloakService {
         }
     }
 
-
-
-
-    public List<UserRepresentation> getAllUsers() {
-        String accessToken = getAdminAccessToken();
-        return keycloakClient.getAllUsers("Bearer " + accessToken);
+    public String extractKeycloakIdFromResponse(ResponseEntity<Object> response) {
+        if (response.getHeaders().containsKey("Location")) {
+            String location = response.getHeaders().get("Location").get(0);
+            return location.substring(location.lastIndexOf("/") + 1);
+        }
+        throw new RuntimeException("Impossibile estrarre l'ID utente dalla risposta di Keycloak");
     }
 
+    private UtenteKeycloak convertToUtenteKeycloak(UtenteShop utenteShop) {
+        UtenteKeycloak keycloak = new UtenteKeycloak();
+        keycloak.setUsername(utenteShop.getUsername());
+        keycloak.setFirstName(utenteShop.getFirstName());
+        keycloak.setLastName(utenteShop.getLastName());
+        keycloak.setEmail(utenteShop.getEmail());
+        keycloak.setEnabled(true);
+        return keycloak;
+    }
+
+    private void validateUtenteShop(UtenteShop utenteShop) {
+        if (utenteShop.getFirstName() == null || utenteShop.getLastName() == null || utenteShop.getUsername() == null) {
+            throw new IllegalArgumentException("I campi obbligatori non sono valorizzati.");
+        }
+    }
 }

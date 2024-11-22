@@ -15,6 +15,7 @@ public class UtenteShop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String keycloakId;
 
     @NotBlank(message = "Firstname is required")

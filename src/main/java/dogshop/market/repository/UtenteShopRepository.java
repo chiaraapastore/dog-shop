@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UtenteShopRepository extends JpaRepository<UtenteShop, Long> {
-    @Query("SELECT u FROM UtenteShop u WHERE u.username = :username")
     UtenteShop findByUsername(@Param("username")String username);
 
 }
