@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
-
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -17,11 +17,9 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "utente_shop_id", nullable = false)
     private UtenteShop utenteShop;
-
 
     @NotNull(message = "Order date is required")
     private LocalDate orderDate;
@@ -35,6 +33,10 @@ public class CustomerOrder {
 
     private String orderNumber;
 
+    @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<OrderProduct> orderProducts;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -89,6 +91,14 @@ public class CustomerOrder {
 
     public void setOrderNumber(String orderNumber) {
         this.orderNumber = orderNumber;
+    }
+
+    public List<OrderProduct> getOrderProducts() {
+        return orderProducts;
+    }
+
+    public void setOrderProducts(List<OrderProduct> orderProducts) {
+        this.orderProducts = orderProducts;
     }
 
 }

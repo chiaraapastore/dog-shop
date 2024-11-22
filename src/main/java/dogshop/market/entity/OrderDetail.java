@@ -14,9 +14,9 @@ public class OrderDetail {
     @EmbeddedId
     private OrderDetailId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("customerOrderId")
-    @JoinColumn(name = "customer_order_id")
+    @JoinColumn(name = "customer_order_id", nullable = false)
     private CustomerOrder customerOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)

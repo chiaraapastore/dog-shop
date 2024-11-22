@@ -8,6 +8,7 @@ import dogshop.market.entity.UtenteKeycloak;
 import dogshop.market.repository.UtenteShopRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import jakarta.transaction.Transactional;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,83 +60,77 @@ public class KeycloakService {
             throw new RuntimeException("Login failed with status: " + responseEntity.getStatusCode());
         }
     }
-    public UtenteShop createUtenteInKeycloak(UtenteShop utenteShop) throws FeignException {
 
-        String accessToken = getAdminAccessToken();
-        String authorizationHeader = "Bearer " + accessToken;
-
-        List<UserRepresentation> existingUsers = keycloakClient.getUsersByUsername(authorizationHeader, utenteShop.getEmail());
-        if (!existingUsers.isEmpty()) {
-            throw new RuntimeException("Email già esistente in Keycloak: " + utenteShop.getEmail());
+    @Transactional
+    public UtenteShop createUtenteInKeycloak(UtenteShop utenteShop) {
+        if (utenteShop.getFirstName() == null || utenteShop.getLastName() == null || utenteShop.getUsername() == null) {
+            throw new IllegalArgumentException("I campi obbligatori non sono valorizzati.");
         }
+        try {
 
-        UtenteKeycloak utenteKeycloak = convertToUtenteKeycloak(utenteShop);
+            // Ottieni il token di amministrazione
+            String accessToken = getAdminAccessToken();
+            String authorizationHeader = "Bearer " + accessToken;
 
-        ResponseEntity<Object> response = keycloakClient.createUsers(authorizationHeader, utenteKeycloak);
-        if (response == null || !response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Errore durante la creazione dell'utente in Keycloak: " +
-                    (response != null ? response.getBody() : "Nessuna risposta dal server."));
+            // Controlla se l'utente esiste già in Keycloak
+            System.out.println("Verifica se l'utente esiste già in Keycloak...");
+            List<UserRepresentation> existingUsers = keycloakClient.getUsersByUsername(authorizationHeader, utenteShop.getUsername());
+            if (!existingUsers.isEmpty()) {
+                throw new RuntimeException("L'utente esiste già in Keycloak.");
+            }
+
+            // Creazione dell'utente su Keycloak
+            UtenteKeycloak utenteKeycloak = convertToUtenteKeycloak(utenteShop);
+            ResponseEntity<Object> response = keycloakClient.createUsers(authorizationHeader, utenteKeycloak);
+            if (response == null || !response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Errore durante la creazione dell'utente in Keycloak.");
+            }
+            System.out.println("Utente creato in Keycloak con successo.");
+
+            // Recupera il Keycloak ID
+            String location = response.getHeaders().get("location").get(0);
+            String[] locationParts = location.split("/");
+            String keycloakId = locationParts[locationParts.length - 1];
+            utenteShop.setKeycloakId(keycloakId);
+
+            // Salva l'utente nel database
+            System.out.println("Salvo l'utente nel database...");
+            UtenteShop savedUtenteShop = utenteShopRepository.save(utenteShop);
+            System.out.println("Utente salvato nel database: " + savedUtenteShop);
+
+            // Assegna ruoli su Keycloak
+            assignRolesToUser(authorizationHeader, keycloakId, utenteShop.getRole());
+
+            return savedUtenteShop;
+        } catch (Exception e) {
+            System.err.println("Errore durante la creazione dell'utente: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Errore durante la creazione dell'utente: " + e.getMessage(), e);
         }
-
-        String location = response.getHeaders().get("location").get(0);
-        String[] locationParts = location.split("/");
-        String keycloakId = locationParts[locationParts.length - 1];
-
-        utenteShop.setKeycloakId(keycloakId);
-
-
-        UtenteShop savedUtenteShop = utenteShopRepository.save(utenteShop);
-        assignRolesToUser(authorizationHeader, keycloakId, utenteShop.getRole());
-
-        return savedUtenteShop;
     }
+
+
+
 
 
     private void assignRolesToUser(String authorizationHeader, String userId, String role) {
-        try {
-            ResponseEntity<List<RoleKeycloak>> rolesResponse = keycloakClient.getAvailableRoles(
-                    authorizationHeader,
-                    userId,
-                    "0",
-                    "100");
+        ResponseEntity<List<RoleKeycloak>> rolesResponse = keycloakClient.getAvailableRoles(authorizationHeader, userId, "0", "100");
+        List<RoleKeycloak> roleList = rolesResponse.getBody();
 
-            List<RoleKeycloak> roleList = rolesResponse.getBody();
+        Optional<RoleKeycloak> selectedRoleOpt = roleList.stream()
+                .filter(r -> r.getRole().equals(role))
+                .findFirst();
 
-            System.out.println("Ruoli disponibili per il client:");
-            roleList.forEach(r -> System.out.println("Ruolo: " + r.getRole()));
-
-            Optional<RoleKeycloak> selectedRoleOpt = roleList.stream()
-                    .filter(r -> r.getRole().equals(role))
-                    .findFirst();
-
-            if (selectedRoleOpt.isEmpty()) {
-                throw new RuntimeException("Ruolo non trovato: " + role + ". Ruoli disponibili: " +
-                        roleList.stream().map(RoleKeycloak::getRole).collect(Collectors.joining(", ")));
-            }
-
-            RoleKeycloak selectedRole = selectedRoleOpt.get();
-            String clientIdRole = Optional.ofNullable(selectedRole.getClientId())
-                    .orElseThrow(() -> new RuntimeException("Client ID non trovato per il ruolo: " + selectedRole.getRole()));
-
-            List<RoleRepresentation> rolesToAssign = List.of(selectedRole.toRoleRepresentation());
-            ResponseEntity<Object> addRoleResponse = keycloakClient.addRoleToUser(
-                    authorizationHeader, userId, clientIdRole, rolesToAssign);
-
-            if (addRoleResponse == null || !addRoleResponse.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("Errore durante l'assegnazione del ruolo: " +
-                        (addRoleResponse != null ? addRoleResponse.getBody() : "Nessuna risposta dal server."));
-            }
-
-            System.out.println("Ruolo assegnato con successo all'utente con ID: " + userId);
-
-        } catch (FeignException e) {
-            throw new RuntimeException("Errore durante l'assegnazione dei ruoli: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore generale durante l'assegnazione dei ruoli: " + e.getMessage(), e);
+        if (selectedRoleOpt.isEmpty()) {
+            throw new RuntimeException("Ruolo non trovato: " + role);
         }
+
+        RoleKeycloak selectedRole = selectedRoleOpt.get();
+        String clientIdRole = selectedRole.getClientId();
+
+        List<RoleRepresentation> rolesToAssign = List.of(selectedRole.toRoleRepresentation());
+        keycloakClient.addRoleToUser(authorizationHeader, userId, clientIdRole, rolesToAssign);
     }
-
-
 
 
 
@@ -146,7 +141,6 @@ public class KeycloakService {
         keycloak.setLastName(utenteShop.getLastName());
         keycloak.setEmail(utenteShop.getEmail());
         keycloak.setEnabled(true);
-
         return keycloak;
     }
 
@@ -168,6 +162,7 @@ public class KeycloakService {
             throw new RuntimeException("Errore durante l'autenticazione dell'amministratore: " + e.getMessage(), e);
         }
     }
+
 
 
 

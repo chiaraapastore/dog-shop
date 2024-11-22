@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UtenteShopService {
 
-    private  final AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
     private final UtenteShopRepository utenteShopRepository;
 
     public UtenteShopService(AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository) {
@@ -17,9 +17,26 @@ public class UtenteShopService {
     }
 
 
+
+
     public UtenteShop getUserDetails() {
         String username = authenticationService.getUsername();
-        return utenteShopRepository.findByUsername(username);
+        if (username == null || username.equals("guest")) {
+            throw new RuntimeException("Utente non autenticato");
+        }
+        System.out.println("Recuperando utente per username: " + username);
+        UtenteShop user = utenteShopRepository.findByUsername(username);
+
+        if (user == null) {
+            System.err.println("Utente non trovato nel database per username: " + username);
+            throw new RuntimeException("Utente non trovato");
+        }
+
+        System.out.println("Utente trovato: " + user);
+        return user;
     }
+
+
+
 
 }

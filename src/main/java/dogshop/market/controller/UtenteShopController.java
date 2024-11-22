@@ -25,6 +25,15 @@ public class UtenteShopController {
         this.utenteShopService = utenteShopService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<Object> registerUser(@RequestBody UtenteShop utenteShop) {
+        try {
+            UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
@@ -41,6 +50,8 @@ public class UtenteShopController {
         try {
             UtenteShop savedUtenteShop = keycloakService.createUtenteInKeycloak(utenteShop);
             return ResponseEntity.ok(savedUtenteShop);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -53,7 +64,9 @@ public class UtenteShopController {
             UtenteShop utenteShop = utenteShopService.getUserDetails();
             return ResponseEntity.ok(utenteShop);
         } catch (RuntimeException e) {
+            System.err.println("Errore nel recupero dei dettagli utente: " + e.getMessage());
             return ResponseEntity.status(404).body("Utente non trovato");
         }
     }
+
 }

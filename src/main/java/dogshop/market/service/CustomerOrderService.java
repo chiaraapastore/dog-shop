@@ -14,12 +14,18 @@ public class CustomerOrderService {
     private final CustomerOrderRepository customerOrderRepository;
     private final AuthenticationService authenticationService;
     private final UtenteShopRepository utenteShopRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final PaymentRepository paymentRepository;
+    private final OrderProductRepository orderProductRepository;
 
 
-    public CustomerOrderService(CustomerOrderRepository customerOrderRepository,AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository) {
+    public CustomerOrderService(CustomerOrderRepository customerOrderRepository,AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, OrderDetailRepository  orderDetailRepository, PaymentRepository paymentRepository, OrderProductRepository orderProductRepository) {
         this.customerOrderRepository = customerOrderRepository;
         this.authenticationService = authenticationService;
         this.utenteShopRepository = utenteShopRepository;
+        this.orderDetailRepository = orderDetailRepository;
+        this.paymentRepository = paymentRepository;
+        this.orderProductRepository = orderProductRepository;
     }
 
     @Transactional
@@ -29,30 +35,30 @@ public class CustomerOrderService {
     }
 
     @Transactional
-public void cancelOrder(Long orderId) {
-    CustomerOrder order = customerOrderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+    public void cancelOrder(Long orderId) {
+        CustomerOrder order = customerOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-    // elimino dalla tabella orderProduct
-    List<OrderProduct> orderProducts = order.getOrderProducts(); 
-    if (orderProducts != null) {
-        for (OrderProduct orderProduct : orderProducts) {
-            orderProductRepository.delete(orderProduct); 
+        // Rimuovi i dettagli dell'ordine
+        List<OrderDetail> orderDetails = orderDetailRepository.findByCustomerOrderId(orderId);
+        if (orderDetails != null) {
+            for (OrderDetail detail : orderDetails) {
+                orderDetailRepository.delete(detail);
+            }
         }
+        // Rimuovi i prodotti associati all'ordine
+        if (order.getOrderProducts() != null) {
+            for (OrderProduct product : order.getOrderProducts()) {
+                orderProductRepository.delete(product);
+            }
+        }
+
+        // Rimuovi il pagamento associato
+        if (order.getPayment() != null) {
+            paymentRepository.delete(order.getPayment());
+        }
+
+        // Elimina l'ordine
+        customerOrderRepository.delete(order);
     }
-
-    // elimino il pagamento associato all'ordine
-    if (order.getPayment() != null) {
-        paymentRepository.delete(order.getPayment()); 
-    }
-
-    // ed elimino l'ordine con il dettaglio dalla 
-    orderDetailRepository.deleteByCustomerOrderId(orderId); 
-    // dopo aver dissociato/eliminato gli ordini dalle altre tabelle elimino l'ordine che voglio cancellare
-    customerOrderRepository.delete(order);
-}
-
-
-
-
 }

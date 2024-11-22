@@ -15,4 +15,6 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @Query("SELECT MAX(o.id) FROM CustomerOrder o")
     Long findMaxOrderId();
+
+
 }
