@@ -13,6 +13,9 @@ public class PaymentController {
 
     private PaymentService paymentService;
 
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
     @PostMapping("/createPayment")
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
