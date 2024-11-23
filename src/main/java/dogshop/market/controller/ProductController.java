@@ -3,7 +3,6 @@ package dogshop.market.controller;
 import dogshop.market.entity.Product;
 import dogshop.market.service.ProductService;
 import dogshop.market.service.UtenteShopService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,6 @@ public class ProductController {
     private final ProductService productService;
     private final UtenteShopService userService;
 
-    @Autowired
     public ProductController(ProductService productService, UtenteShopService userService) {
         this.productService = productService;
         this.userService = userService;

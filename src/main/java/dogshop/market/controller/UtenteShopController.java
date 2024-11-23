@@ -4,12 +4,11 @@ import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.service.KeycloakService;
 import dogshop.market.service.UtenteShopService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/utente")
@@ -23,33 +22,27 @@ public class UtenteShopController {
         this.utenteShopService = utenteShopService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody UtenteShop utenteShop) {
-        Map<String, Object> response = new HashMap<>();
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody TokenRequest tokenRequest) {
         try {
-            UtenteShop savedUser = keycloakService.createUtenteInKeycloak(utenteShop);
-            response.put("message", "Utente registrato con successo");
-            response.put("user", savedUser);
-            return ResponseEntity.ok(response);
+            String token = keycloakService.login(tokenRequest.getUsername(), tokenRequest.getPassword());
+            return ResponseEntity.ok(token);
         } catch (Exception e) {
-            response.put("message", "Errore durante la registrazione");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenziali non valide");
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody TokenRequest tokenRequest) {
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/create/users/keycloak")
+    public ResponseEntity<Object> createUtenteKeycloak(@RequestBody UtenteShop utenteShop) {
         try {
-            String token = keycloakService.login(tokenRequest.getUsername(), tokenRequest.getPassword());
-            response.put("message", "Login effettuato con successo");
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+            System.out.println("Tentativo di registrazione utente: " + utenteShop.getUsername());
+            UtenteShop savedUtenteShop = keycloakService.createUtenteInKeycloak(utenteShop);
+            System.out.println("Utente registrato con successo: " + savedUtenteShop);
+            return ResponseEntity.ok(savedUtenteShop);
         } catch (Exception e) {
-            response.put("message", "Credenziali non valide");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            System.err.println("Errore durante la registrazione dell'utente: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -59,7 +52,9 @@ public class UtenteShopController {
             UtenteShop utenteShop = utenteShopService.getUserDetails();
             return ResponseEntity.ok(utenteShop);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
+            System.err.println("Errore nel recupero dei dettagli utente: " + e.getMessage());
+            return ResponseEntity.status(404).body("Utente non trovato");
         }
     }
+
 }

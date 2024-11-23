@@ -25,7 +25,6 @@ public interface KeycloakClient {
             @RequestParam("client_id") String clientId,
             @RequestParam("client_secret") String clientSecret);
 
-
     @RequestMapping(method = RequestMethod.POST,
             value = "/admin/realms/${keycloak.realm}/users",
             produces = "application/json")
