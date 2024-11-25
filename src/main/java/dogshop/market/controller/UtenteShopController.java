@@ -82,4 +82,11 @@ public class UtenteShopController {
         }
     }
 
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> checkUserExists(@RequestParam String username) {
+        boolean exists = utenteShopService.userExistsByUsername(username);
+        return ResponseEntity.ok(exists);
+    }
+
+
 }

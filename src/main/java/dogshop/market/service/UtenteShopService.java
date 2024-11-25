@@ -47,5 +47,15 @@ public class UtenteShopService {
         }
         return false;
     }
+
+
+    public boolean userExistsByUsername(String username) {
+        UtenteShop user = utenteShopRepository.findByUsername(username);
+       if (user != null) {
+           return true;
+       }else{
+           return false;
+       }
+    }
 }
 
