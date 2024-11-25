@@ -36,4 +36,22 @@ public class AuthenticationService {
             return "guest";
         }
     }
+
+    public String getUserId() {
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            String authorizationHeader = request.getHeader("Authorization");
+
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                throw new RuntimeException("Authorization header is missing or invalid.");
+            }
+
+            String token = authorizationHeader.split(" ")[1];
+            return JwtUtils.getUserIdFromToken(token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero dell'ID utente: " + e.getMessage());
+        }
+    }
+
 }

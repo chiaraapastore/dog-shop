@@ -1,55 +1,38 @@
-version: '3.8'
+version: '3'
+volumes:
+  keycloak-data:
+    driver: local
 
 services:
-  keycloak_dog-shop:
-    container_name: dog-shop-keycloak-container
-    image: quay.io/keycloak/keycloak:22.0.3
-    command: start-dev
+  postgres:
+    image: postgres:latest
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
     environment:
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8080
-      KC_HOSTNAME_STRICT_BACKCHANNEL: 'false'   # Abilita il supporto HTTP (senza HTTPS)
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: my_keycloak
+      POSTGRES_PASSWORD: password
+
+  keycloak:
+    build: .
+    container_name: keycloak-dog-shop
+    environment:
+      KC_HOSTNAME_STRICT: 'false'
       KC_HOSTNAME_STRICT_HTTPS: 'false'
-      KC_HEALTH_ENABLED: 'true'
-
-
+      KC_HTTP_ENABLED: 'true'
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME_ADMIN_URL: "http://localhost:8080"
+      KC_HEALTH_ENABLED: 'true'
+      KC_METRICS_ENABLED: 'true'
+      KC_HOSTNAME: localhost
+      PROXY_ADDRESS_FORWARDING: "true"
 
-      KC_DB: postgres
-      KC_DB_URL_HOST: postgres_keycloak_dog-shop
-      KC_DB_URL_DATABASE: dog-shop
-      KC_DB_URL_USERNAME: keycloak
-      KC_DB_PASSWORD: password
-      KC_DB_SCHEMA: public
-
+    command:
+      - "-v"
+      - "start"
+      - "--optimized"
     ports:
       - "8080:8080"
-    restart: always
+      - "8443:8443"
     depends_on:
-      postgres_keycloak_dog-shop:
-        condition: service_healthy
-    networks:
-      - dog-shop_dev_network
-  postgres_keycloak_dog-shop:
-    image: postgres:16
-    command: postgres -c 'max_connections=200'
-    volumes:
-      - /var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: dog-shop
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-    healthcheck:
-      test: "exit 0"
-    ports:
-      - "5432:5432"
-    networks:
-      - dog-shop_dev_network
-volumes:
-  pgdata_keycloak_dog-shop:
-
-networks:
-  dog-shop_dev_network:
-    driver: bridge
+      - postgres

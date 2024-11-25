@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-@FeignClient(name = "keycloakClient", url = "${keycloak.auth-server-url}")
+@FeignClient(name = "keycloakClient", url = "${keycloak.admin.auth-server-url}")
 public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.POST,
