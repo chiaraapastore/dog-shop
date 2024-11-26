@@ -99,23 +99,25 @@ public class ProductService {
 
     @Transactional
     public void updateProductQuantityInCart(Long productId, Long cartId, int quantityChange) {
+        if (quantityChange == 0) {
+            throw new IllegalArgumentException("La modifica della quantità deve essere diversa da zero");
+        }
+
         CartProduct cartProduct = cartProductRepository.findByCartIdAndProductId(cartId, productId)
-                .orElseThrow(() -> new RuntimeException("Product not found in cart"));
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato nel carrello"));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
 
         int newAvailableQuantity = product.getAvailableQuantity() - quantityChange;
-
         if (newAvailableQuantity < 0) {
-            throw new RuntimeException("Not enough stock available");
+            throw new RuntimeException("Quantità non disponibile in stock");
         }
 
         product.setAvailableQuantity(newAvailableQuantity);
         productRepository.save(product);
 
         int newCartQuantity = cartProduct.getQuantity() + quantityChange;
-
         if (newCartQuantity <= 0) {
             cartProductRepository.delete(cartProduct);
         } else {
@@ -123,6 +125,7 @@ public class ProductService {
             cartProductRepository.save(cartProduct);
         }
     }
+
 
     public List<Product> searchProducts(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {

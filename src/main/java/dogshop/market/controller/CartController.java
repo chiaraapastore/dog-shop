@@ -19,10 +19,11 @@ public class CartController {
     }
 
     @GetMapping("/cart-with-products")
-    public ResponseEntity<List<Product>> getCartWithProducts() {
-        List<Product> productsInCart = cartService.getProductsInCart();
-        return ResponseEntity.ok(productsInCart);
+    public ResponseEntity<List<CartProduct>> getCartWithProducts() {
+        List<CartProduct> cartProducts = cartService.getProductsInCart();
+        return ResponseEntity.ok(cartProducts);
     }
+
 
     @PostMapping("/addProductToCart")
     public ResponseEntity<?> addProductToCart(@RequestBody CartProductRequest request) {
@@ -43,14 +44,17 @@ public class CartController {
 
 
     @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<String> removeProductFromCart(@PathVariable Long productId) {
-        try {
-            cartService.removeProductFromCart(productId);
-            return ResponseEntity.ok("Prodotto rimosso dal carrello con successo.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("An error occurred: " + e.getMessage());
-        }
+    public ResponseEntity<Void> removeProductFromCart(@PathVariable Long productId) {
+        cartService.removeProductFromCart(productId);
+        return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/update-quantity/{productId}")
+    public ResponseEntity<Void> updateQuantityProduct(
+            @PathVariable Long productId,
+            @RequestParam int quantity) {
+        cartService.updateProductQuantityInCart(productId, quantity);
+        return ResponseEntity.ok().build();
+    }
+
 }

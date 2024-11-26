@@ -33,6 +33,7 @@ public class Product {
 
     private String sizeProduct;
 
+
     @Version
     private Integer version;
 
@@ -92,4 +93,5 @@ public class Product {
     public void setVersion(Integer version) {
         this.version = version;
     }
+
 }

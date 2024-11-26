@@ -31,7 +31,6 @@ public class UtenteShopService {
 
     public UtenteShop updateUtente(Long id, UtenteShop utenteShopDetails) {
         return utenteShopRepository.findById(id).map(existingUser -> {
-            // Aggiorna i dettagli dell'utente
             existingUser.setFirstName(utenteShopDetails.getFirstName());
             existingUser.setLastName(utenteShopDetails.getLastName());
             existingUser.setEmail(utenteShopDetails.getEmail());
