@@ -135,4 +135,30 @@ public class CartService {
         cartProduct.setQuantity(newQuantity);
         cartProductRepository.save(cartProduct);
     }
+
+
+    @Transactional
+    public void checkoutCart() {
+
+        UtenteShop user = getAuthenticatedUser();
+
+        Cart cart = getCartForUser(user);
+
+        List<CartProduct> cartProducts = cartProductRepository.findByCart(cart);
+
+        for (CartProduct cartProduct : cartProducts) {
+            Product product = cartProduct.getProduct();
+            int updatedQuantity = product.getAvailableQuantity() - cartProduct.getQuantity();
+
+            if (updatedQuantity < 0) {
+                throw new IllegalArgumentException("Quantità insufficiente per il prodotto: " + product.getProductName());
+            }
+
+            product.setAvailableQuantity(updatedQuantity);
+            productRepository.save(product);
+        }
+        cartProductRepository.deleteAll(cartProducts);
+        cartRepository.delete(cart);
+    }
+
 }
