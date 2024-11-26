@@ -30,8 +30,8 @@ public class CartService {
     }
 
     public List<Product> getProductsInCart() {
-        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
 
+        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
         if (utenteShop == null) {
             throw new IllegalArgumentException("Utente non trovato");
         }
@@ -40,11 +40,12 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
 
         List<CartProduct> cartProducts = cartProductRepository.findByCart(cart);
-
         return cartProducts.stream()
                 .map(CartProduct::getProduct)
                 .collect(Collectors.toList());
     }
+
+
 
     public Cart addProductToCart(Long productId, int quantity) {
         if (quantity <= 0) {
@@ -117,37 +118,53 @@ public class CartService {
 
     @Transactional
     public void updateProductQuantityInCart(Long productId, int newQuantity) {
-        if (newQuantity <= 0) {
-            throw new IllegalArgumentException("La quantità deve essere maggiore di zero");
-        }
 
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
         if (utenteShop == null) {
             throw new IllegalArgumentException("Utente non trovato");
         }
 
+
         Cart cart = cartRepository.findByUtenteShop(utenteShop)
                 .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
 
-        CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, productRepository.findById(productId)
-                        .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato")))
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato"));
+
+
+        CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
 
-        Product product = cartProduct.getProduct();
+        int currentCartQuantity = cartProduct.getQuantity(); // Quantità corrente nel carrello
 
-        if (newQuantity > product.getAvailableQuantity()) {
-            throw new RuntimeException("Quantità richiesta non disponibile");
+
+        System.out.println("Quantità corrente nel carrello: " + currentCartQuantity);
+        System.out.println("Nuova quantità richiesta: " + newQuantity);
+        System.out.println("Disponibile nel DB prima dell'operazione: " + product.getAvailableQuantity());
+
+
+        int availableQuantityIncludingCart = product.getAvailableQuantity() + currentCartQuantity;
+
+
+        if (newQuantity > availableQuantityIncludingCart) {
+            throw new IllegalArgumentException("Quantità richiesta non disponibile. Disponibile: " + product.getAvailableQuantity());
         }
 
-        int quantityDifference = newQuantity - cartProduct.getQuantity();
 
+        int quantityDifference = newQuantity - currentCartQuantity;
 
         product.setAvailableQuantity(product.getAvailableQuantity() - quantityDifference);
-        productRepository.save(product);
+
 
         cartProduct.setQuantity(newQuantity);
+
         cartProductRepository.save(cartProduct);
+        productRepository.save(product);
+
+        System.out.println("Quantità disponibile nel DB dopo l'operazione: " + product.getAvailableQuantity());
     }
+
 
 
 }

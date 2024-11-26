@@ -49,11 +49,12 @@ public class CartController {
     }
 
     @PutMapping("/update-quantity/{productId}")
-    public ResponseEntity<Void> updateQuantityProduct(
+    public ResponseEntity<Void> updateProductQuantity(
             @PathVariable Long productId,
             @RequestParam int quantity) {
         cartService.updateProductQuantityInCart(productId, quantity);
         return ResponseEntity.ok().build();
     }
+
 
 }
