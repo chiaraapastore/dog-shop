@@ -2,7 +2,6 @@ package dogshop.market.controller;
 
 import dogshop.market.entity.*;
 import dogshop.market.service.CartService;
-import dogshop.market.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,19 +13,16 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
-    private final PaymentService paymentService;
 
-    public CartController(CartService cartService, PaymentService paymentService) {
+    public CartController(CartService cartService) {
         this.cartService = cartService;
-        this.paymentService = paymentService;
     }
 
     @GetMapping("/cart-with-products")
-    public ResponseEntity<List<CartProduct>> getCartWithProducts() {
-        List<CartProduct> cartProducts = cartService.getProductsInCart();
-        return ResponseEntity.ok(cartProducts);
+    public ResponseEntity<List<Product>> getCartWithProducts() {
+        List<Product> productsInCart = cartService.getProductsInCart();
+        return ResponseEntity.ok(productsInCart);
     }
-
 
     @PostMapping("/addProductToCart")
     public ResponseEntity<?> addProductToCart(@RequestBody CartProductRequest request) {
@@ -59,31 +55,5 @@ public class CartController {
         cartService.updateProductQuantityInCart(productId, quantity);
         return ResponseEntity.ok().build();
     }
-
-    @PostMapping("/checkout")
-    public ResponseEntity<Void> checkoutCart() {
-        try {
-            cartService.checkoutCart();
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-
-    @PostMapping("/checkout/{orderId}")
-    public ResponseEntity<CustomerOrder> checkout(@PathVariable Long orderId) {
-        try {
-            CustomerOrder ordine = paymentService.checkout(orderId);
-            return ResponseEntity.ok(ordine);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
 
 }
