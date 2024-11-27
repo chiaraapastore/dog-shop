@@ -26,6 +26,8 @@ public class OrderDetail {
 
     private LocalDate paymentDate;
 
+    private int quantity;
+
     public CustomerOrder getCustomerOrder() {
         return customerOrder;
     }
@@ -56,4 +58,7 @@ public class OrderDetail {
     public void setId(OrderDetailId id) {
         this.id = id;
     }
+
+    public int getQuantity() {return quantity;}
+    public void setQuantity(int quantity) {this.quantity = quantity;}
 }

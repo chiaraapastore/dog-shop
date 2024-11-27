@@ -25,5 +25,4 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
     Optional<CustomerOrder> findByIdWithLock(@Param("id") Long id);
 
 
-
 }
