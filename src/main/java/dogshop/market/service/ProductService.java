@@ -2,7 +2,6 @@ package dogshop.market.service;
 import dogshop.market.entity.CartProduct;
 import dogshop.market.entity.Product;
 import dogshop.market.repository.CartProductRepository;
-import jakarta.persistence.OptimisticLockException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import dogshop.market.entity.Category;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -36,16 +36,23 @@ public class ProductService {
         }
 
         Category category = categoryService.findCategoryById(categoryId);
-        productDetails.setCategory(category);
 
-        category.setCountProduct(category.getCountProduct() + 1);
-        productDetails.setSizeProduct(productDetails.getSizeProduct());
-        productDetails.setProductName(productDetails.getProductName());
-        productDetails.setPrice(productDetails.getPrice());
-        productDetails.setAvailableQuantity(productDetails.getAvailableQuantity());
+        Optional<Product> existingProductOpt = productRepository.findByProductNameAndCategory(productDetails.getProductName(), category);
+        if (existingProductOpt.isPresent()) {
+            Product existingProduct = existingProductOpt.get();
+            existingProduct.setAvailableQuantity(existingProduct.getAvailableQuantity() + productDetails.getAvailableQuantity());
+            return productRepository.save(existingProduct);
+        } else {
+            productDetails.setCategory(category);
+            category.setCountProduct(category.getCountProduct() + 1);
 
-        return productRepository.save(productDetails);
+            return productRepository.save(productDetails);
+        }
     }
+
+
+
+
 
 
     @Transactional
@@ -70,11 +77,32 @@ public class ProductService {
 
 
     public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isPresent()) {
+            Product product = productOptional.get();
+
+            if (product.getAvailableQuantity() > 1) {
+                product.setAvailableQuantity(product.getAvailableQuantity() - 1);
+                productRepository.save(product);
+            } else {
+
+                product.setAvailableQuantity(0);
+                productRepository.save(product);
+
+                Category category = product.getCategory();
+                long productsCount = productRepository.countByCategory(category);
+                if (productsCount == 0) {
+                    categoryService.deleteCategory(category.getId());
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Product not found with id: " + id);
+        }
     }
 
+
     public Product findProductById(Long id) {
-        System.out.println("Looking for product with ID: " + id); // Log per debug
+        System.out.println("Looking for product with ID: " + id);
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
     }
