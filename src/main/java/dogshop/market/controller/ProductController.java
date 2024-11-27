@@ -21,10 +21,18 @@ public class ProductController {
     }
 
     @PutMapping("/{id}/{categoryId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails, @PathVariable Long categoryId) {
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable Long id,
+            @RequestBody Product productDetails,
+            @PathVariable Long categoryId) {
+        System.out.println("Product ID: " + id);
+        System.out.println("Category ID: " + categoryId);
+
         Product updatedProduct = productService.updateProduct(id, productDetails, categoryId);
         return ResponseEntity.ok(updatedProduct);
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
@@ -34,9 +42,10 @@ public class ProductController {
 
     @PostMapping("/create/{categoryId}")
     public ResponseEntity<Product> createProduct(@RequestBody Product productDetails, @PathVariable Long categoryId) {
-        Product createdProduct = productService.createProduct(productDetails,categoryId);
+        Product createdProduct = productService.createProduct(productDetails, categoryId);
         return ResponseEntity.ok(createdProduct);
     }
+
 
 
     @GetMapping("/{id}")

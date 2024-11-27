@@ -50,22 +50,22 @@ public class ProductService {
 
     @Transactional
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
-        try {
-            Product existingProduct = productRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
 
-            existingProduct.setProductName(productDetails.getProductName());
-            existingProduct.setPrice(productDetails.getPrice());
-            existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
-
-            Category category = categoryService.findCategoryById(categoryId);
-            existingProduct.setCategory(category);
-
-            return productRepository.save(existingProduct);
-        } catch (OptimisticLockException e) {
-            throw new RuntimeException("Product was modified by another transaction. Please reload and try again.");
+        Category category = categoryService.findCategoryById(categoryId);
+        if (category == null) {
+            throw new RuntimeException("Category not found with ID: " + categoryId);
         }
+
+        existingProduct.setProductName(productDetails.getProductName());
+        existingProduct.setPrice(productDetails.getPrice());
+        existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
+        existingProduct.setCategory(category);
+
+        return productRepository.save(existingProduct);
     }
+
 
 
 
