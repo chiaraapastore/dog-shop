@@ -16,7 +16,7 @@ public class CartProduct {
     @MapsId("cartId")
     private Cart cart;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @MapsId("productId")
     private Product product;
 

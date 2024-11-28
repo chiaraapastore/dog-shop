@@ -34,14 +34,13 @@ public class ProductService {
     @Transactional
     public Product createProduct(Product productDetails, Long categoryId) {
         System.out.println("Looking for category with ID: " + categoryId);
-        // Trova la categoria dal database
+
         Category category = categoryService.findCategoryById(categoryId);
         if (category == null) {
             System.out.println("Category not found with ID: " + categoryId);
             throw new RuntimeException("Category not found with ID: " + categoryId);
         }
         System.out.println("Found category: " + category.getCategoryName());
-
 
         productDetails.setCategory(category);
         productDetails.setCategoryName(category.getCategoryName());
@@ -53,9 +52,7 @@ public class ProductService {
             existingProduct.setAvailableQuantity(existingProduct.getAvailableQuantity() + productDetails.getAvailableQuantity());
             return productRepository.save(existingProduct);
         } else {
-
             category.setCountProduct(category.getCountProduct() + 1);
-
 
             if (productDetails.getVersion() == null) {
                 productDetails.setVersion(0);
@@ -90,29 +87,7 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        if (productOptional.isPresent()) {
-            Product product = productOptional.get();
-
-            if (product.getAvailableQuantity() == 0) {
-                productRepository.delete(product);
-            } else {
-
-                product.setAvailableQuantity(product.getAvailableQuantity() - 1);
-                productRepository.save(product);
-            }
-
-
-            if (product.getAvailableQuantity() == 0) {
-                Category category = product.getCategory();
-                long productsCount = productRepository.countByCategory(category);
-                if (productsCount == 0) {
-                    categoryService.deleteCategory(category.getId());
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("Product not found with id: " + id);
-        }
+        productRepository.deleteById(id);
     }
 
 
