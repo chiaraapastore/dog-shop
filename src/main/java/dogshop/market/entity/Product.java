@@ -25,14 +25,13 @@ public class Product {
     @Min(value = 0, message = "Quantity cannot be negative")
     private int availableQuantity;
 
-    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     private String categoryName;
 
     private String sizeProduct;
-
 
     @Version
     private Integer version;
@@ -86,12 +85,10 @@ public class Product {
     public void setSizeProduct(String sizeProduct) {
         this.sizeProduct = sizeProduct;
     }
-
     public Integer getVersion() {
         return version;
     }
     public void setVersion(Integer version) {
         this.version = version;
     }
-
 }

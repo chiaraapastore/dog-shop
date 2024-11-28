@@ -42,6 +42,7 @@ public class ProductController {
 
     @PostMapping("/create/{categoryId}")
     public ResponseEntity<Product> createProduct(@RequestBody Product productDetails, @PathVariable Long categoryId) {
+        System.out.println("Received Category ID: " + categoryId);
         Product createdProduct = productService.createProduct(productDetails, categoryId);
         return ResponseEntity.ok(createdProduct);
     }
