@@ -62,21 +62,18 @@ public class PaymentService {
                     return createOrder(utenteShop);
                 });
 
-        // Verifica che l'ordine sia processabile
         if (!"PENDING".equals(ordine.getStatus())) {
             throw new RuntimeException("Ordine non processabile: stato non valido.");
         }
 
         try {
             System.out.println("Lock acquisito sull'ordine con ID: " + ordine.getId());
-            Thread.sleep(5000); // Ritardo di 10 secondi
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
 
-
-        // Processa i prodotti dell'ordine
         List<CartProduct> prodottiCarrello = cartProductRepository.findByCart(carrello);
         List<OrderDetail> dettagliOrdine = processCartProducts(ordine, prodottiCarrello);
 
@@ -123,16 +120,13 @@ public class PaymentService {
                 throw new RuntimeException("Quantità insufficiente per il prodotto: " + prodotto.getProductName());
             }
 
-            // Aggiorna la quantità disponibile del prodotto
             prodotto.setAvailableQuantity(nuovaQuantitaDisponibile);
             productRepository.save(prodotto);
 
-            // Aggiorna il conteggio nella categoria del prodotto
             Category categoria = prodotto.getCategory();
             categoria.setCountProduct(categoria.getCountProduct() - cartProduct.getQuantity());
             categoryRepository.save(categoria);
 
-            // Crea un nuovo dettaglio ordine
             OrderDetail dettaglioOrdine = new OrderDetail();
             dettaglioOrdine.setId(new OrderDetailId(ordine.getId(), prodotto.getId()));
             dettaglioOrdine.setCustomerOrder(ordine);

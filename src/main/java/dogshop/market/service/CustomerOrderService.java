@@ -39,26 +39,26 @@ public class CustomerOrderService {
         CustomerOrder order = customerOrderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Rimuovi i dettagli dell'ordine
+
         List<OrderDetail> orderDetails = orderDetailRepository.findByCustomerOrderId(orderId);
         if (orderDetails != null) {
             for (OrderDetail detail : orderDetails) {
                 orderDetailRepository.delete(detail);
             }
         }
-        // Rimuovi i prodotti associati all'ordine
+
         if (order.getOrderProducts() != null) {
             for (OrderProduct product : order.getOrderProducts()) {
                 orderProductRepository.delete(product);
             }
         }
 
-        // Rimuovi il pagamento associato
+
         if (order.getPayment() != null) {
             paymentRepository.delete(order.getPayment());
         }
 
-        // Elimina l'ordine
+
         customerOrderRepository.delete(order);
     }
 }

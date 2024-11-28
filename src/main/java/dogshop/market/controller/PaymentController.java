@@ -1,10 +1,6 @@
 package dogshop.market.controller;
 
-import dogshop.market.entity.CustomerOrder;
 import dogshop.market.entity.Payment;
-import dogshop.market.entity.UtenteShop;
-import dogshop.market.repository.CustomerOrderRepository;
-import dogshop.market.repository.UtenteShopRepository;
 import dogshop.market.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -42,26 +42,26 @@ public class ProductService {
         }
         System.out.println("Found category: " + category.getCategoryName());
 
-        // Imposta la categoria nel prodotto
-        productDetails.setCategory(category);
-        productDetails.setCategoryName(category.getCategoryName());  // Aggiungi il nome della categoria (se necessario)
 
-        // Verifica se il prodotto esiste già
+        productDetails.setCategory(category);
+        productDetails.setCategoryName(category.getCategoryName());
+
+
         Optional<Product> existingProductOpt = productRepository.findByProductNameAndCategory(productDetails.getProductName(), category);
         if (existingProductOpt.isPresent()) {
             Product existingProduct = existingProductOpt.get();
             existingProduct.setAvailableQuantity(existingProduct.getAvailableQuantity() + productDetails.getAvailableQuantity());
             return productRepository.save(existingProduct);
         } else {
-            // Incrementa il contatore dei prodotti nella categoria
+
             category.setCountProduct(category.getCountProduct() + 1);
 
-            // Imposta la versione a 0 solo per nuovi prodotti
+
             if (productDetails.getVersion() == null) {
-                productDetails.setVersion(0);  // Impostazione esplicita della versione
+                productDetails.setVersion(0);
             }
 
-            return productRepository.save(productDetails);  // Salva il nuovo prodotto
+            return productRepository.save(productDetails);
         }
     }
 
@@ -94,16 +94,15 @@ public class ProductService {
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
 
-            // Se la quantità è zero, elimina direttamente il prodotto
             if (product.getAvailableQuantity() == 0) {
-                productRepository.delete(product); // Elimina il prodotto dal database
+                productRepository.delete(product);
             } else {
-                // Se la quantità è maggiore di zero, decrementa
+
                 product.setAvailableQuantity(product.getAvailableQuantity() - 1);
                 productRepository.save(product);
             }
 
-            // Se il prodotto è stato eliminato e ha una categoria, verifica se la categoria deve essere eliminata
+
             if (product.getAvailableQuantity() == 0) {
                 Category category = product.getCategory();
                 long productsCount = productRepository.countByCategory(category);

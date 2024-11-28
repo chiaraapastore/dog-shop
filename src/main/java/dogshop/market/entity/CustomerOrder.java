@@ -36,7 +36,6 @@ public class CustomerOrder {
     @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderProduct> orderProducts;
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

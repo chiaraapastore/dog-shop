@@ -30,7 +30,7 @@ public class AuthenticationService {
             String token = authorizationHeader.split(" ")[1];
             System.out.println("Extracted Token: " + token);
 
-            String username = JwtUtils.getNameFromToken(token); // Metodo per estrarre il nome utente
+            String username = JwtUtils.getNameFromToken(token);
             System.out.println("Decoded Username: " + username);
 
             return username;

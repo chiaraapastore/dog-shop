@@ -1,15 +1,12 @@
 package dogshop.market.service;
 
 import dogshop.market.client.KeycloakClient;
-import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.repository.UtenteShopRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
