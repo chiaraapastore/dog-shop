@@ -94,13 +94,17 @@ public class ProductService {
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
 
-            if (product.getAvailableQuantity() > 1) {
+            // Se la quantità è zero, elimina direttamente il prodotto
+            if (product.getAvailableQuantity() == 0) {
+                productRepository.delete(product); // Elimina il prodotto dal database
+            } else {
+                // Se la quantità è maggiore di zero, decrementa
                 product.setAvailableQuantity(product.getAvailableQuantity() - 1);
                 productRepository.save(product);
-            } else {
-                product.setAvailableQuantity(0);
-                productRepository.save(product);
+            }
 
+            // Se il prodotto è stato eliminato e ha una categoria, verifica se la categoria deve essere eliminata
+            if (product.getAvailableQuantity() == 0) {
                 Category category = product.getCategory();
                 long productsCount = productRepository.countByCategory(category);
                 if (productsCount == 0) {
@@ -111,6 +115,7 @@ public class ProductService {
             throw new IllegalArgumentException("Product not found with id: " + id);
         }
     }
+
 
     public Product findProductById(Long id) {
         System.out.println("Looking for product with ID: " + id);
