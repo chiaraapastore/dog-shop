@@ -85,7 +85,7 @@ public class CartService {
         }
 
         product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
-        productRepository.save(product);;
+        productRepository.save(product);
 
         return cart;
     }
@@ -136,7 +136,7 @@ public class CartService {
         CartProduct cartProduct = cartProductRepository.findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
 
-        int currentCartQuantity = cartProduct.getQuantity(); // Quantità corrente nel carrello
+        int currentCartQuantity = cartProduct.getQuantity();
 
 
         System.out.println("Quantità corrente nel carrello: " + currentCartQuantity);

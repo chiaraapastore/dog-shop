@@ -23,16 +23,7 @@ public class PaymentService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public PaymentService(
-            PaymentRepository paymentRepository,
-            CustomerOrderRepository customerOrderRepository,
-            CartProductRepository cartProductRepository,
-            AuthenticationService authenticationService,
-            UtenteShopRepository utenteShopRepository,
-            CartRepository cartRepository,
-            OrderDetailRepository orderDetailRepository,
-            ProductRepository productRepository,
-            CategoryRepository categoryRepository) {
+    public PaymentService(PaymentRepository paymentRepository, CustomerOrderRepository customerOrderRepository, CartProductRepository cartProductRepository, AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, CartRepository cartRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.paymentRepository = paymentRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.cartProductRepository = cartProductRepository;

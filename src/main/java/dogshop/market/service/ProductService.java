@@ -33,14 +33,13 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Product productDetails, Long categoryId) {
-        System.out.println("Looking for category with ID: " + categoryId);
 
         Category category = categoryService.findCategoryById(categoryId);
         if (category == null) {
-            System.out.println("Category not found with ID: " + categoryId);
-            throw new RuntimeException("Category not found with ID: " + categoryId);
+            System.out.println("Categoria non trovata con ID: " + categoryId);
+            throw new RuntimeException("Categoria non trovata con ID: " + categoryId);
         }
-        System.out.println("Found category: " + category.getCategoryName());
+        System.out.println("Categoria trovata: " + category.getCategoryName());
 
         productDetails.setCategory(category);
         productDetails.setCategoryName(category.getCategoryName());
@@ -68,12 +67,12 @@ public class ProductService {
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
 
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato con ID: " + id));
 
 
         Category category = categoryService.findCategoryById(categoryId);
         if (category == null) {
-            throw new RuntimeException("Category not found with ID: " + categoryId);
+            throw new RuntimeException("Categoria non trovata con ID: " + categoryId);
         }
 
 
@@ -92,9 +91,8 @@ public class ProductService {
 
 
     public Product findProductById(Long id) {
-        System.out.println("Looking for product with ID: " + id);
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
     }
 
     public Page<Product> findAllProducts(int page, int size, String sortBy, String sortDir, String category, String sizeProduct) {

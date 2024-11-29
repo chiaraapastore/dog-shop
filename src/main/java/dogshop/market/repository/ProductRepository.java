@@ -18,7 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE (:category IS NULL OR p.category.categoryName = :category) AND (:sizeProduct IS NULL OR p.sizeProduct = :sizeProduct)")
     Page<Product> findBySizeProduct(@Param("sizeProduct") String sizeProduct, Pageable pageable, @Param("category") String category);
     List<Product> findByProductNameContainingIgnoreCase(String keyword);
-    long countByCategory(Category category);
     Optional<Product> findByProductNameAndCategory(String productName, Category category);
 
 }

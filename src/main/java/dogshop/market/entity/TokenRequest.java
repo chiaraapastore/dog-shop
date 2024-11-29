@@ -31,21 +31,21 @@ public class TokenRequest {
         this.grant_type = grant_type;
     }
 
-    public @NotBlank(message = "Client ID is required") String getClient_id() {
+    public  String getClient_id() {
         return client_id;
     }
-    public @NotBlank(message = "Client Secret is required") String getClient_secret() {
+    public  String getClient_secret() {
         return client_secret;
     }
-    public @NotBlank(message = "Grant type is required") String getGrant_type() {
+    public String getGrant_type() {
         return grant_type;
     }
 
-    public @NotBlank(message = "Password is required") @Size(min = 6, message = "Password should be at least 6 characters") String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public @NotBlank(message = "Username is required") String getUsername() {
+    public  String getUsername() {
         return username;
     }
 

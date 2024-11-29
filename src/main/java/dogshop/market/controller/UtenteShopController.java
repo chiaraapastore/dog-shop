@@ -5,7 +5,6 @@ import dogshop.market.entity.TokenRequest;
 import dogshop.market.entity.UtenteShop;
 import dogshop.market.service.KeycloakService;
 import dogshop.market.service.UtenteShopService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ public class UtenteShopController {
     private final UtenteShopService utenteShopService;
     private final AuthenticationService authenticationService;
 
-    @Autowired
     public UtenteShopController(KeycloakService keycloakService, UtenteShopService utenteShopService, AuthenticationService authenticationService) {
         this.keycloakService = keycloakService;
         this.utenteShopService = utenteShopService;

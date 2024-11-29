@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
 
-    @Value("${keycloak.admin.access.secret}")
     private static String secret;
 
+    public JwtUtils(@Value("${keycloak.admin.access.secret}") String secret) {
+        this.secret = secret;
+    }
 
     public static String getUserIdFromToken(String token) {
         try {
