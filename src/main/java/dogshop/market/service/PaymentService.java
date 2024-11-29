@@ -23,7 +23,16 @@ public class PaymentService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public PaymentService(PaymentRepository paymentRepository, CustomerOrderRepository customerOrderRepository, CartProductRepository cartProductRepository, AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, CartRepository cartRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public PaymentService(
+            PaymentRepository paymentRepository,
+            CustomerOrderRepository customerOrderRepository,
+            CartProductRepository cartProductRepository,
+            AuthenticationService authenticationService,
+            UtenteShopRepository utenteShopRepository,
+            CartRepository cartRepository,
+            OrderDetailRepository orderDetailRepository,
+            ProductRepository productRepository,
+            CategoryRepository categoryRepository) {
         this.paymentRepository = paymentRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.cartProductRepository = cartProductRepository;
@@ -59,7 +68,7 @@ public class PaymentService {
 
         try {
             System.out.println("Lock acquisito sull'ordine con ID: " + ordine.getId());
-            Thread.sleep(5000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

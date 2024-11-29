@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -13,14 +12,14 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
-@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
-
 
     public SecurityConfig(TokenConverterProperties properties) {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -31,34 +30,46 @@ public class SecurityConfig {
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
         http
-                .authorizeHttpRequests(
-                        (authorize) -> authorize.requestMatchers("/api/cart/**").authenticated()
-                                .anyRequest().permitAll()
+                .csrf(csrf -> csrf.disable()) // Disabilita CSRF
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configurazione CORS
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/cart/**").authenticated() // Protezione per API Cart
+                        .requestMatchers("/api/orders/**").authenticated() // Protezione per API Orders
+                        .requestMatchers("/public/**").permitAll() // Endpoints pubblici
+                        .anyRequest().permitAll() // Tutti gli altri permessi
                 )
-                .csrf((csrf) -> csrf.disable())
-                .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer((OAuth2)-> OAuth2.jwt(Customizer.withDefaults()))
-                .sessionManagement((session)->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling((exceptions) -> exceptions
-                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sessione stateless
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())) // Configura il convertitore JWT
                 )
-                .cors((cors) -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOrigin("http://localhost:4200");
-                    config.addAllowedHeader("*");
-                    config.addAllowedMethod("*");
-                    return config;
-                }));
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // Gestione di mancata autenticazione
+                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()) // Gestione accesso negato
+                );
+
         return http.build();
     }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthorityPrefix("");
+        grantedAuthoritiesConverter.setAuthorityPrefix(""); // Rimuovi prefisso predefinito
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(keycloakJwtTokenConverter);
         return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:4200"); // Frontend Angular
+        configuration.addAllowedHeader("*"); // Tutti gli header
+        configuration.addAllowedMethod("*"); // Tutti i metodi (GET, POST, etc.)
+        configuration.addExposedHeader("Authorization"); // Esponi header Authorization
+        configuration.setAllowCredentials(true); // Consenti credenziali
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Applica la configurazione CORS globalmente
+        return source;
     }
 }
