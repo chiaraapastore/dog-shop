@@ -23,16 +23,7 @@ public class PaymentService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public PaymentService(
-            PaymentRepository paymentRepository,
-            CustomerOrderRepository customerOrderRepository,
-            CartProductRepository cartProductRepository,
-            AuthenticationService authenticationService,
-            UtenteShopRepository utenteShopRepository,
-            CartRepository cartRepository,
-            OrderDetailRepository orderDetailRepository,
-            ProductRepository productRepository,
-            CategoryRepository categoryRepository) {
+    public PaymentService(PaymentRepository paymentRepository, CustomerOrderRepository customerOrderRepository, CartProductRepository cartProductRepository, AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, CartRepository cartRepository, OrderDetailRepository orderDetailRepository, ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.paymentRepository = paymentRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.cartProductRepository = cartProductRepository;
@@ -63,7 +54,7 @@ public class PaymentService {
                 });
 
         if (!"PENDING".equals(ordine.getStatus())) {
-            throw new RuntimeException("Ordine non processabile: stato non valido.");
+            throw new RuntimeException("Ordine non processabile: stato non valido (" + ordine.getStatus() + ").");
         }
 
         try {
@@ -105,7 +96,10 @@ public class PaymentService {
         ordine.setStatus("PENDING");
         ordine.setTotalAmount(calculateTotalAmount(utenteShop));
         ordine.setOrderNumber(generateOrderNumber());
-        return customerOrderRepository.save(ordine);
+
+        CustomerOrder savedOrder = customerOrderRepository.save(ordine);
+        System.out.println("Ordine creato con stato: " + savedOrder.getStatus());
+        return savedOrder;
     }
 
     private List<OrderDetail> processCartProducts(CustomerOrder ordine, List<CartProduct> prodottiCarrello) {
