@@ -2,11 +2,13 @@ package dogshop.market.service;
 import dogshop.market.config.AuthenticationService;
 import dogshop.market.entity.*;
 import dogshop.market.repository.*;
+import jakarta.persistence.criteria.Order;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerOrderService {
@@ -61,4 +63,7 @@ public class CustomerOrderService {
 
         customerOrderRepository.delete(order);
     }
+
+
+
 }

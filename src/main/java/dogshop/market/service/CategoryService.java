@@ -3,6 +3,8 @@ package dogshop.market.service;
 
 import dogshop.market.entity.Category;
 import dogshop.market.repository.CategoryRepository;
+import dogshop.market.repository.ProductRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +15,11 @@ import java.util.Optional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     public Category findCategoryById(Long id) {
@@ -50,7 +54,14 @@ public class CategoryService {
         return false;
     }
 
-
-
-
+    @Scheduled(cron = "0 0/30 * * * *")
+    public void syncCountProduct() {
+        List<Category> categories = categoryRepository.findAll();
+        for (Category category : categories) {
+            int actualProductCount = productRepository.countByCategory(category);
+            category.setCountProduct(actualProductCount);
+            categoryRepository.save(category);
+        }
+        System.out.println("Sincronizzazione automatica del countProduct completata.");
+    }
 }

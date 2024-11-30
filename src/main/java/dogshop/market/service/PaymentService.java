@@ -102,6 +102,7 @@ public class PaymentService {
         return savedOrder;
     }
 
+
     private List<OrderDetail> processCartProducts(CustomerOrder ordine, List<CartProduct> prodottiCarrello) {
         List<OrderDetail> dettagliOrdine = new ArrayList<>();
 
@@ -118,7 +119,13 @@ public class PaymentService {
             productRepository.save(prodotto);
 
             Category categoria = prodotto.getCategory();
-            categoria.setCountProduct(categoria.getCountProduct() - cartProduct.getQuantity());
+            int nuovoCountProduct = categoria.getCountProduct() - cartProduct.getQuantity();
+
+            if (nuovoCountProduct < 0) {
+                throw new RuntimeException("Errore: prodotti insufficienti nella categoria " + categoria.getCategoryName());
+            }
+
+            categoria.setCountProduct(nuovoCountProduct);
             categoryRepository.save(categoria);
 
             OrderDetail dettaglioOrdine = new OrderDetail();
@@ -133,6 +140,8 @@ public class PaymentService {
 
         return dettagliOrdine;
     }
+
+
 
 
     private double calculateTotalAmount(UtenteShop utenteShop) {

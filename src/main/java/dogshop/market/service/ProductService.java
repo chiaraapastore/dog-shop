@@ -31,6 +31,8 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+
+
     @Transactional
     public Product createProduct(Product productDetails, Long categoryId) {
 
@@ -65,28 +67,46 @@ public class ProductService {
 
     @Transactional
     public Product updateProduct(Long id, Product productDetails, Long categoryId) {
-
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prodotto non trovato con ID: " + id));
 
+        Category oldCategory = existingProduct.getCategory();
+        Category newCategory = categoryService.findCategoryById(categoryId);
 
-        Category category = categoryService.findCategoryById(categoryId);
-        if (category == null) {
+        if (newCategory == null) {
             throw new RuntimeException("Categoria non trovata con ID: " + categoryId);
         }
-
 
         existingProduct.setProductName(productDetails.getProductName());
         existingProduct.setPrice(productDetails.getPrice());
         existingProduct.setAvailableQuantity(productDetails.getAvailableQuantity());
-        existingProduct.setCategory(category);
+        existingProduct.setCategory(newCategory);
 
+        productRepository.save(existingProduct);
 
-        return productRepository.save(existingProduct);
+        int oldCategoryCount = productRepository.countByCategory(oldCategory);
+        oldCategory.setCountProduct(oldCategoryCount);
+        categoryRepository.save(oldCategory);
+
+        int newCategoryCount = productRepository.countByCategory(newCategory);
+        newCategory.setCountProduct(newCategoryCount);
+        categoryRepository.save(newCategory);
+
+        return existingProduct;
     }
 
+
+    @Transactional
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
+
+        Category category = product.getCategory();
         productRepository.deleteById(id);
+
+        int actualProductCount = productRepository.countByCategory(category);
+        category.setCountProduct(actualProductCount);
+        categoryRepository.save(category);
     }
 
 
