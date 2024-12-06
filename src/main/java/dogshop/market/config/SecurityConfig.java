@@ -62,14 +62,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:4200"); // Frontend Angular
-        configuration.addAllowedHeader("*"); // Tutti gli header
-        configuration.addAllowedMethod("*"); // Tutti i metodi (GET, POST, etc.)
-        configuration.addExposedHeader("Authorization"); // Esponi header Authorization
-        configuration.setAllowCredentials(true); // Consenti credenziali
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+        configuration.addExposedHeader("Authorization");
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Applica la configurazione CORS globalmente
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
