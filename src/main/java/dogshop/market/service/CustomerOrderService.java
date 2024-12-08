@@ -16,16 +16,14 @@ public class CustomerOrderService {
     private final CustomerOrderRepository customerOrderRepository;
     private final AuthenticationService authenticationService;
     private final UtenteShopRepository utenteShopRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final PaymentRepository paymentRepository;
     private final OrderProductRepository orderProductRepository;
 
 
-    public CustomerOrderService(CustomerOrderRepository customerOrderRepository,AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, OrderDetailRepository  orderDetailRepository, PaymentRepository paymentRepository, OrderProductRepository orderProductRepository) {
+    public CustomerOrderService(CustomerOrderRepository customerOrderRepository,AuthenticationService authenticationService, UtenteShopRepository utenteShopRepository, PaymentRepository paymentRepository, OrderProductRepository orderProductRepository) {
         this.customerOrderRepository = customerOrderRepository;
         this.authenticationService = authenticationService;
         this.utenteShopRepository = utenteShopRepository;
-        this.orderDetailRepository = orderDetailRepository;
         this.paymentRepository = paymentRepository;
         this.orderProductRepository = orderProductRepository;
     }
@@ -42,12 +40,6 @@ public class CustomerOrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
 
-        List<OrderDetail> orderDetails = orderDetailRepository.findByCustomerOrderId(orderId);
-        if (orderDetails != null) {
-            for (OrderDetail detail : orderDetails) {
-                orderDetailRepository.delete(detail);
-            }
-        }
 
         if (order.getOrderProducts() != null) {
             for (OrderProduct product : order.getOrderProducts()) {

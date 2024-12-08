@@ -25,8 +25,8 @@ public class Product {
     @Min(value = 0, message = "Quantity cannot be negative")
     private int availableQuantity;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     private String categoryName;
@@ -91,4 +91,7 @@ public class Product {
     public void setVersion(Integer version) {
         this.version = version;
     }
+
+
+
 }

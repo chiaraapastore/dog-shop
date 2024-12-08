@@ -16,11 +16,12 @@ public class CartProduct {
     @MapsId("cartId")
     private Cart cart;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @MapsId("productId")
     private Product product;
 
     private int quantity;
+
 
 
     public CartProductId getId() {
@@ -53,5 +54,6 @@ public class CartProduct {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
 
 }

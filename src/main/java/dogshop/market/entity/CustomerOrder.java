@@ -32,6 +32,7 @@ public class CustomerOrder {
     private Payment payment;
 
     private String orderNumber;
+    
 
     @OneToMany(mappedBy = "customerOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderProduct> orderProducts;

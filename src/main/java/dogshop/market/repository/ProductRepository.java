@@ -21,4 +21,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByProductNameAndCategory(String productName, Category category);
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category = :category")
     int countByCategory(Category category);
+    List<Product> findByAvailableQuantity(int availableQuantity);
 }

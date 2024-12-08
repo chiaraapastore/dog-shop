@@ -110,6 +110,7 @@ public class ProductService {
     }
 
 
+
     public Product findProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prodotto non trovato"));
@@ -156,6 +157,11 @@ public class ProductService {
             cartProduct.setQuantity(newCartQuantity);
             cartProductRepository.save(cartProduct);
         }
+        if (product.getAvailableQuantity() <= 0) {
+            productRepository.delete(product);
+            System.out.println("Prodotto eliminato dal database: " + product.getId());
+        }
+
     }
 
     public List<Product> searchProducts(String keyword) {
