@@ -18,12 +18,6 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-   /*@PostMapping("/createPayment")
-    public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
-        Payment savedPayment = paymentService.savePayment(payment);
-        return new ResponseEntity<>(savedPayment, HttpStatus.CREATED);
-    }*/
-
 
     @PostMapping("/checkout")
     public ResponseEntity<CustomerOrder> checkout() {

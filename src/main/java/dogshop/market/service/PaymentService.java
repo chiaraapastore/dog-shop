@@ -93,13 +93,20 @@ public class PaymentService {
         for (CartProduct cartProduct : prodottiCarrello) {
             Product prodotto = cartProduct.getProduct();
             if (prodotto.getAvailableQuantity() == 0) {
+               Category category =  prodotto.getCategory();
+               if(category != null) {
+                   category.setCountProduct(category.getCountProduct() -1);
+                   categoryRepository.save(category);
+               }
                 cartProductRepository.delete(cartProduct);
                 productRepository.delete(prodotto);
             }
+
         }
 
         cartProductRepository.deleteAll(prodottiCarrello);
         cartRepository.delete(carrello);
+
 
         System.out.println("Pagamento completato con successo per l'ordine ID: " + ordine.getId());
         return pagamentoSalvato;
