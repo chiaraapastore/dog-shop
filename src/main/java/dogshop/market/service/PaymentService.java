@@ -38,60 +38,6 @@ public class PaymentService {
         this.orderProductRepository = orderProductRepository;
     }
 
-  /* @Transactional
-    public Payment savePayment(Payment pagamento) {
-        try {
-
-            UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
-            if (utenteShop == null) {
-                throw new RuntimeException("Utente non trovato");
-            }
-            Cart carrello = cartRepository.findCartWithProductsByUtenteShop(utenteShop);
-            if (carrello == null) {
-                throw new RuntimeException("Carrello vuoto");
-            }
-
-         CustomerOrder ordine = customerOrderRepository.findByIdWithLock(pagamento.getId())
-                   .orElseGet(() -> {
-                        System.out.println("Nessun ordine trovato. Creazione di un nuovo ordine.");
-                       return createOrder(utenteShop);
-                   });
-
-           if (!"PENDING".equals(ordine.getStatus())) {
-               throw new RuntimeException("Ordine non processabile: stato non valido (" + ordine.getStatus() + ").");
-           }
-
-            List<CartProduct> prodottiCarrello = cartProductRepository.findByCart(carrello);
-
-            pagamento.setPaymentDate(LocalDate.now());
-            pagamento.setStatus("SUCCESS");
-            Payment pagamentoSalvato = paymentRepository.save(pagamento);
-            ordine.setPayment(pagamentoSalvato);
-            ordine.setStatus("COMPLETED");
-            customerOrderRepository.save(ordine);
-
-
-            for (CartProduct cartProduct : prodottiCarrello) {
-                Product prodotto = cartProduct.getProduct();
-                if (prodotto.getAvailableQuantity() == 0) {
-                    cartProductRepository.delete(cartProduct);
-                    productRepository.delete(prodotto);
-                }
-            }
-
-
-            cartProductRepository.deleteAll(prodottiCarrello);
-            cartRepository.delete(carrello);
-
-            System.out.println("Pagamento completato con successo.");
-            return pagamentoSalvato;
-
-        } catch (Exception e) {
-            System.err.println("Errore durante l'elaborazione del pagamento: " + e.getMessage());
-            throw new RuntimeException("Errore nell'elaborazione del pagamento", e);
-        }
-    }*/
-
     @Transactional
     public CustomerOrder checkout() {
         UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
@@ -120,11 +66,21 @@ public class PaymentService {
             System.err.println("Errore: ID dell'ordine mancante nel pagamento: " + pagamento);
             throw new RuntimeException("ID dell'ordine mancante nel pagamento");
         }
+        UtenteShop utenteShop = utenteShopRepository.findByUsername(authenticationService.getUsername());
+        if (utenteShop == null) {
+            throw new RuntimeException("Utente non trovato");
+        }
+        Cart carrello = cartRepository.findCartWithProductsByUtenteShop(utenteShop);
+        if (carrello == null) {
+            throw new RuntimeException("Carrello vuoto");
+        }
+
         CustomerOrder ordine = customerOrderRepository.findById(pagamento.getId())
                 .orElseThrow(() -> new RuntimeException("Ordine non trovato"));
         if (!"PENDING".equals(ordine.getStatus())) {
             throw new RuntimeException("Ordine non processabile: stato non valido (" + ordine.getStatus() + ").");
         }
+        List<CartProduct> prodottiCarrello = cartProductRepository.findByCart(carrello);
 
         pagamento.setPaymentDate(LocalDate.now());
         pagamento.setStatus("SUCCESS");
@@ -133,6 +89,17 @@ public class PaymentService {
         ordine.setPayment(pagamentoSalvato);
         ordine.setStatus("COMPLETED");
         customerOrderRepository.save(ordine);
+
+        for (CartProduct cartProduct : prodottiCarrello) {
+            Product prodotto = cartProduct.getProduct();
+            if (prodotto.getAvailableQuantity() == 0) {
+                cartProductRepository.delete(cartProduct);
+                productRepository.delete(prodotto);
+            }
+        }
+
+        cartProductRepository.deleteAll(prodottiCarrello);
+        cartRepository.delete(carrello);
 
         System.out.println("Pagamento completato con successo per l'ordine ID: " + ordine.getId());
         return pagamentoSalvato;
