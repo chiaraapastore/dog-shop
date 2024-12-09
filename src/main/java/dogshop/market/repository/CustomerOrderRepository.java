@@ -23,5 +23,4 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
     @Query("SELECT o FROM CustomerOrder o WHERE o.id = :id")
     Optional<CustomerOrder> findByIdWithLock(@Param("id") Long id);
 
-
 }

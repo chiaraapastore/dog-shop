@@ -1,5 +1,6 @@
 package dogshop.market.controller;
 
+import dogshop.market.entity.CustomerOrder;
 import dogshop.market.entity.Payment;
 import dogshop.market.service.PaymentService;
 import org.springframework.http.HttpStatus;
@@ -17,10 +18,23 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/createPayment")
+   /*@PostMapping("/createPayment")
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
         Payment savedPayment = paymentService.savePayment(payment);
         return new ResponseEntity<>(savedPayment, HttpStatus.CREATED);
+    }*/
+
+
+    @PostMapping("/checkout")
+    public ResponseEntity<CustomerOrder> checkout() {
+        CustomerOrder ordine = paymentService.checkout();
+        return new ResponseEntity<>(ordine, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/acquista")
+    public ResponseEntity<Payment> acquista(@RequestBody Payment payment) {
+        Payment savedPayment = paymentService.acquista(payment);
+        return new ResponseEntity<>(savedPayment, HttpStatus.OK);
     }
 
 }

@@ -20,6 +20,7 @@ public class Payment {
     @NotBlank(message = "Status is required")
     private String status;
 
+
     public Payment(LocalDate paymentDate, String paymentMethod, String status) {
         this.paymentDate = paymentDate;
         this.paymentMethod = paymentMethod;
@@ -59,4 +60,5 @@ public class Payment {
     public void setStatus(String status) {
         this.status = status;
     }
+
 }

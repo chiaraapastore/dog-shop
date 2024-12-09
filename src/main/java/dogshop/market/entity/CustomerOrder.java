@@ -101,4 +101,8 @@ public class CustomerOrder {
         this.orderProducts = orderProducts;
     }
 
+    public List<OrderProduct> getCartProducts() {
+        return orderProducts;
+    }
+
 }
