@@ -26,7 +26,6 @@ public class UtenteShop {
 
     private String username;
 
-    private String role;
 
 
     public Long getId() {
@@ -65,6 +64,4 @@ public class UtenteShop {
     public void setUsername(String username) {
         this.username = username;
     }
-    public String getRole() {return role;}
-    public void setRole(String role) {this.role = role;}
 }

@@ -28,6 +28,4 @@ public class CustomerOrderController {
         return ResponseEntity.noContent().build();
     }
 
-
-
 }

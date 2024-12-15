@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class PaymentService {
@@ -51,9 +49,9 @@ public class PaymentService {
             throw new RuntimeException("Carrello vuoto");
         }
         CustomerOrder ordine = createOrder(utenteShop);
+
         ordine.setStatus("PENDING");
         customerOrderRepository.save(ordine);
-
         System.out.println("Ordine creato con successo.");
         return ordine;
     }
@@ -112,6 +110,26 @@ public class PaymentService {
         return pagamentoSalvato;
     }
 
+    @Transactional
+    public void annullaOrdine(Long orderId) {
+        try {
+
+            CustomerOrder ordine = customerOrderRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Ordine non trovato"));
+
+
+            ordine.setStatus("CANCELED");
+            customerOrderRepository.save(ordine);
+
+            System.out.println("Ordine annullato con successo e stato aggiornato a CANCELED per ID: " + orderId);
+        } catch (Exception ex) {
+
+            System.err.println("Errore durante l'annullamento dell'ordine: " + ex.getMessage());
+
+            throw new RuntimeException("Errore durante l'annullamento dell'ordine: " + ex.getMessage());
+        }
+    }
+
 
     private CustomerOrder createOrder(UtenteShop utenteShop) {
         CustomerOrder ordine = new CustomerOrder();
@@ -125,6 +143,8 @@ public class PaymentService {
         System.out.println("Ordine creato con stato: " + savedOrder.getStatus());
         return savedOrder;
     }
+
+
 
 
 

@@ -59,7 +59,7 @@ public class ProductController {
     @GetMapping("/list")
     public ResponseEntity<Page<Product>> findAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "productName") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false)String category,

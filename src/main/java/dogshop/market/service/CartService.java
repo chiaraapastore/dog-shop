@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -42,7 +43,7 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("Carrello non trovato"));
         List<CartProduct> cartProducts = cartProductRepository.findByCart(cart);
         System.out.println("Prodotti carrello"+cartProducts);
-        return cartProductRepository.findByCart(cart);
+        return cartProducts;
     }
 
     @Transactional
@@ -62,7 +63,7 @@ public class CartService {
 
         if (product.getAvailableQuantity() <= 0) {
             productRepository.delete(product);
-            productRepository.flush(); // Forza l'eliminazione immediata
+            productRepository.flush();
             throw new IllegalArgumentException("Il prodotto non è disponibile ed è stato eliminato.");
         }
 
@@ -129,6 +130,7 @@ public class CartService {
         if (cartProductRepository.findByCart(cart).isEmpty()) {
             cartRepository.delete(cart);
         }
+
     }
 
     @Transactional
@@ -148,11 +150,6 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("Prodotto non trovato nel carrello"));
 
         int currentCartQuantity = cartProduct.getQuantity();
-        int availableQuantityIncludingCart = product.getAvailableQuantity() + currentCartQuantity;
-
-        if (newQuantity > availableQuantityIncludingCart) {
-            throw new IllegalArgumentException("Quantità richiesta non disponibile");
-        }
 
         int quantityDifference = newQuantity - currentCartQuantity;
         product.setAvailableQuantity(product.getAvailableQuantity() - quantityDifference);
